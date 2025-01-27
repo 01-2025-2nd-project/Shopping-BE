@@ -1,23 +1,19 @@
 server:
-  port : 8080
+  port: 8080
+
 spring:
-#  datasource:
-#    hikari:
-#      maximum-lifetime: 1800000
-#    username: ENC(TGTXnlkPQu5tZnI2EUSF1A==)
-#    password: ENC(ssiwx5mdhQVVOa0qAmQxgk6Zy9Wff9/E)
-#    driver-class-name: org.mariadb.jdbc.Driver
-#    url: jdbc:mariadb://drugstoredb.cn000owqib3s.ap-northeast-2.rds.amazonaws.com:3306/drug_store_db?useUnicode=true&characterEncoding=UTF-8
   datasource:
     username:
     password:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/farm_plus?useUnicode=true&characterEncoding=UTF-8
-    jpa:
-      show-sql: true
   jpa:
     show-sql: true
     database-platform: org.hibernate.dialect.MySQLDialect
   logging:
     level:
       io.netty.resolver.dns: DEBUG
+
+jwt:
+  secret: your-secret-key-here  # JWT 비밀키 추가
+  expiration: 86400000            # JWT 만료 시간 (예: 1일)
