@@ -25,9 +25,8 @@ public class UserController {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
-    //회원가입
     @PostMapping("/sign-up")
-    public ResponseEntity<?> signUp(@RequestBody UserSignupRequest request){
+    public ResponseEntity<?> signUp(@RequestBody UserSignupRequest request) {
         // 이메일 중복 체크
         if (userService.isEmailExists(request.getEmail())) {
             return new ResponseEntity<>(new UserApiResponse(409, request.getEmail() + "는 이미 존재하는 이메일입니다. 다른 이메일을 이용해주세요.", true), HttpStatus.CONFLICT);
@@ -35,7 +34,7 @@ public class UserController {
 
         // 닉네임 중복 체크
         if (userService.isNicknameExists(request.getNickname())) {
-            return new ResponseEntity<>(new UserApiResponse(409, "는 이미 존재하는 닉네임입니다. 다른 닉네임을 이용해주세요.", true), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(new UserApiResponse(409, request.getNickname() + "는 이미 존재하는 닉네임입니다. 다른 닉네임을 이용해주세요.", true), HttpStatus.CONFLICT);
         }
 
         // 사용자 등록
@@ -50,42 +49,40 @@ public class UserController {
 
         userService.registerUser(newUser);
 
-        return new ResponseEntity<>(new UserApiResponse(200, "user" + request.getNickname()+ "님 회원 가입에 성공하셨습니다."), HttpStatus.OK);
+        return new ResponseEntity<>(new UserApiResponse(200, "user " + request.getNickname() + "님 회원 가입에 성공하셨습니다."), HttpStatus.OK);
     }
 
-    // 로그인
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserLoginRequest request) {
         User user = userService.login(request.getEmail(), request.getPassword());
 
-        if(user == null) {
-            return new ResponseEntity<>("Cannot find user with ID", HttpStatus.NOT_FOUND);
+        if (user == null) {
+            return new ResponseEntity<>(new UserApiResponse(404, "Cannot find user with ID"), HttpStatus.NOT_FOUND);
         }
 
-        //JWT 토큰 생성
+        // JWT 토큰 생성
         String token = jwtTokenProvider.generateToken(user.getEmail());
 
-        if(token == null) {
-            return new ResponseEntity<>("Login not possible", HttpStatus.INTERNAL_SERVER_ERROR);
+        if (token == null) {
+            return new ResponseEntity<>(new UserApiResponse(500, "Login not possible"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         // 헤더에 토큰 포함
         HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.set("Authorization", "Bearer" + token);
+        responseHeaders.set("Authorization", "Bearer " + token);
 
         return new ResponseEntity<>(new UserApiResponse(200, "Login Success"), responseHeaders, HttpStatus.OK);
     }
 
-    // 닉네임 중복 확인
     @GetMapping("/nickname")
     public ResponseEntity<?> checkNickname(@RequestParam String nickname) {
-        if (userService.isNicknameExists(nickname)){
+        if (userService.isNicknameExists(nickname)) {
             return new ResponseEntity<>(new UserApiResponse(409, nickname + "는 이미 존재하는 닉네임입니다. 다른 닉네임을 이용해주세요.", true), HttpStatus.CONFLICT);
         }
-        return new ResponseEntity<>(new UserApiResponse(200, nickname + "사용하실 수 있는 닉네임입니다."), HttpStatus.OK);
+        return new ResponseEntity<>(new UserApiResponse(200, nickname + "는 사용하실 수 있는 닉네임입니다."), HttpStatus.OK);
     }
 
-    // 이메일 중복 확인
+    @GetMapping("/email")
     public ResponseEntity<?> checkEmail(@RequestParam String email) {
         if (userService.isEmailExists(email)) {
             return new ResponseEntity<>(new UserApiResponse(409, email + "는 이미 존재하는 이메일입니다. 다른 이메일을 이용해주세요.", true), HttpStatus.CONFLICT);
