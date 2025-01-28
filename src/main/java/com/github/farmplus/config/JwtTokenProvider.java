@@ -22,12 +22,13 @@ public class JwtTokenProvider {
 
     // 토큰 생성 (역할 포함)
     public String generateToken(String email, Set<Role> roles) {
+        // ClaimsBuilder 생성 후 .setSubject() 사용 후 build()
         Claims claims = (Claims) Jwts.claims().setSubject(email);
 
         // 역할 정보를 Claim에 추가
         String roleClaims = roles.stream()
-                .map(Role::getRoleName)  // Role 객체에서 roleName을 추출
-                .collect(Collectors.joining(","));
+                .map(Role::getRoleName)  // Role 객체에서 roleName을 가져옴
+                .collect(Collectors.joining(","));  // 역할을 콤마로 구분하여 하나의 String으로 결합
         claims.put("roles", roleClaims);  // 역할 정보를 'roles' Claim에 저장
 
         Date now = new Date();
@@ -60,10 +61,7 @@ public class JwtTokenProvider {
                 .getBody();
 
         String roles = claims.get("roles", String.class);
-        if (roles == null || roles.isEmpty()) {
-            return Set.of();
-        }
-        return Set.of(roles.split(","));  // 콤마로 구분된 역할들을 분리하여 Set으로 반환
+        return roles == null ? Set.of() : Set.of(roles.split(","));
     }
 
     // 토큰 유효성 검사

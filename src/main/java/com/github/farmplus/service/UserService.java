@@ -61,7 +61,8 @@ public class UserService {
     }
 
     // 로그인
-    public String login(String email, String password) {
+    // UserService.java
+    public User login(String email, String password) {
         Optional<User> userOptional = userRepository.findByEmail(email);
 
         if (userOptional.isEmpty()) {
@@ -74,7 +75,7 @@ public class UserService {
             throw new IllegalArgumentException("Invalid email or password");
         }
 
-        // JWT 토큰 생성 (기존의 createToken -> generateToken으로 수정)
-        return jwtTokenProvider.generateToken(user.getEmail(), user.getRoles());
+        return user; // User 객체를 반환
     }
+
 }

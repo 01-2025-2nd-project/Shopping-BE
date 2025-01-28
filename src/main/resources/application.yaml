@@ -3,17 +3,19 @@ server:
 
 spring:
   datasource:
-    username: ${NAME}
-    password: ${PASSWORD}
+    username: yj2678
+    password: 12341234
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/farm_plus?useUnicode=true&characterEncoding=UTF-8
   jpa:
     show-sql: true
-    database-platform: org.hibernate.dialect.H2Dialect
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: update
   logging:
     level:
       io.netty.resolver.dns: DEBUG
 
 jwt:
-  secret: your-secret-key-here  # JWT 비밀키
+  secret: "1r9c!Qz$6Q_7p%Lq8$kdD14b%vS5Xw*8"  # JWT 비밀키
   expiration: 86400000         # JWT 만료 시간 (예: 1일)
