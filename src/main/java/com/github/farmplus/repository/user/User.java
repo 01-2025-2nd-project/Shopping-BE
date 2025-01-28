@@ -1,10 +1,12 @@
 package com.github.farmplus.repository.user;
 
 import com.github.farmplus.repository.base.BaseEntity;
+import com.github.farmplus.repository.role.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 @Getter
 @AllArgsConstructor
@@ -37,6 +39,18 @@ public class User extends BaseEntity {
 
     @Column(name = "address", length = 255, nullable = false)
     private String address;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_role",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles;  // 역할 추가
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
 
     // 비밀번호를 암호화된 값으로 설정
     public void setPassword(String password) {
