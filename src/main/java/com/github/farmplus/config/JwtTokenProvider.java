@@ -1,4 +1,4 @@
-package com.github.farmplus.repository.user;
+package com.github.farmplus.config;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;

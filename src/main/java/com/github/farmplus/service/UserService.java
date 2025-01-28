@@ -1,4 +1,4 @@
-package com.github.farmplus.repository.user;
+package com.github.farmplus.service;
 
 import com.github.farmplus.repository.user.UserRepository;
 import com.github.farmplus.repository.user.User;

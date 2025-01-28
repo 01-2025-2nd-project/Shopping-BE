@@ -1,4 +1,4 @@
-package com.github.farmplus.repository.user;
+package com.github.farmplus.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

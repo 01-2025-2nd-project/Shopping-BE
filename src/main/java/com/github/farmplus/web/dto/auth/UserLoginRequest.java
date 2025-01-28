@@ -1,4 +1,4 @@
-package com.github.farmplus.repository.user;
+package com.github.farmplus.web.dto.auth;
 
 import lombok.Getter;
 import lombok.Setter;
