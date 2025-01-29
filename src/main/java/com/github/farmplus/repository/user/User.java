@@ -2,16 +2,13 @@ package com.github.farmplus.repository.user;
 
 import com.github.farmplus.repository.base.BaseEntity;
 import com.github.farmplus.repository.role.Role;
-import com.github.farmplus.repository.userRole.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Getter
 @AllArgsConstructor
@@ -53,21 +50,12 @@ public class User extends BaseEntity {
     )
     private Set<Role> roles;  // 역할 추가
 
-//    public void setRoles(Set<Role> roles) {
-//        this.roles = roles;
-//    }
-//
-//    // 비밀번호를 암호화된 값으로 설정
-//    public void setPassword(String password) {
-//        this.password = password;
-//    }
-
-
+    // 역할 이름을 List<String>으로 반환
     public List<String> getUserRole() {
-        return (List<String>) this.roles.stream()
-                .map(Role::getRoleName)  // Role의 name을 반환
-                .collect(Collectors.toSet());
+        List<String> roleNames = new ArrayList<>();
+        for (Role role : roles) {
+            roleNames.add(role.getRoleName()); // Role 객체에서 역할 이름을 가져와서 리스트에 추가
+        }
+        return roleNames;
     }
-
-
 }

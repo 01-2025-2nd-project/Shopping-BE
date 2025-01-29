@@ -7,22 +7,22 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-@EqualsAndHashCode(of="roleId")
+@EqualsAndHashCode(of = "roleId")
 @Builder
 @Entity
-@Table(name="role")
+@Table(name = "role")
 public class Role {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="role_id")
+    @Column(name = "role_id")
     private Integer roleId;
 
-    @Column(name="role_name", length = 20, nullable = false)
+    @Column(name = "role_name", length = 20, nullable = false)
     private String roleName;
 
-//    // 추가된 역할 이름 반환 메서드
-//    public String getRoleName() {
-//        return this.roleName;
-//    }
-
+    // 역할 이름을 반환하는 메서드
+    public String getRoleName() {
+        return this.roleName;
+    }
 }
