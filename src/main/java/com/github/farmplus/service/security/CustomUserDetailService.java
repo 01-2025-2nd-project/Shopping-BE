@@ -1,8 +1,11 @@
-package com.github.farmplus.repository.security;
+package com.github.farmplus.service.security;
 
+import com.github.farmplus.repository.role.Role;
 import com.github.farmplus.repository.user.User;
 import com.github.farmplus.repository.user.UserRepository;
 import com.github.farmplus.repository.userDetails.CustomUserDetails;
+import com.github.farmplus.repository.userRole.UserRole;
+import com.github.farmplus.service.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,21 +28,13 @@ public class CustomUserDetailService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmailFetchJoin(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Cannot find user with email: " + email));
-
-        // roles가 null이거나 비어 있으면 예외 처리
-        List<String> roles = Optional.ofNullable(user.getRoles()) // null 체크
-                .filter(rolesList -> !rolesList.isEmpty()) // 비어 있지 않은 경우에만 처리
-                .orElseThrow(() -> new UsernameNotFoundException("User has no roles"))
-                .stream()
-                .map(role -> role.getRoleName())  // Role 객체에서 역할 이름만 추출
-                .collect(Collectors.toList());
-
+                .orElseThrow(()->new NotFoundException(email +"에 해당하는 user는 존재하지 않습니다."));
         return CustomUserDetails.builder()
                 .userId(user.getUserId())
                 .email(user.getEmail())
                 .password(user.getPassword())
-                .authorities(roles)  // authorities는 List<String>이므로 그대로 사용
+                .authorities(user.getUserRoles().stream().map(UserRole::getRole).map(Role::getRoleName).collect(Collectors.toList()))
                 .build();
+
     }
 }

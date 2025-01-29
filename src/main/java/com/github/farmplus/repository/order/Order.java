@@ -16,7 +16,7 @@ import java.time.LocalDate;
 @EqualsAndHashCode(of="orderId")
 @Builder
 @Entity
-@Table(name="order")
+@Table(name="orders")
 public class Order extends BaseEntity {
     @Id@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_id")

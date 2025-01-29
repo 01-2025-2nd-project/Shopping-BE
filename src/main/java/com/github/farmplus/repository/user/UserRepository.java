@@ -8,7 +8,7 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User,Integer> {
-    @Query("SELECT up FROM User up JOIN FETCH up.roles WHERE up.email = :email")
+    @Query(" SELECT u FROM User u JOIN FETCH u.userRoles ur JOIN FETCH ur.role WHERE u.email = :email")
     Optional<User> findByEmailFetchJoin(String email);
     Optional<User> findByName(String name);
     boolean existsByEmail (String email); // 이메일로 사용자 찾기

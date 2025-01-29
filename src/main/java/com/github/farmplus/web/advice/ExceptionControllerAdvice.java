@@ -1,13 +1,16 @@
 package com.github.farmplus.web.advice;
 
+import com.github.farmplus.service.exceptions.CAuthenticationEntryPointException;
+import com.github.farmplus.service.exceptions.NotAcceptException;
+import com.github.farmplus.service.exceptions.NotFoundException;
+import com.github.farmplus.web.dto.base.ResponseDto;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.http.HttpStatus;
-import com.github.farmplus.service.exceptions.CustomExceptions.NotFoundException;
-import com.github.farmplus.service.exceptions.CustomExceptions.NotAcceptException;
-import com.github.farmplus.service.exceptions.CustomExceptions.InvalidValueException;
+
 
 
 @Slf4j
@@ -16,32 +19,30 @@ public class ExceptionControllerAdvice {
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(NotFoundException.class)
-    public String handleNotFoundException(NotFoundException nfe) {
-        log.error("Client 요청이후 DB 검색 중 에러로 다음처럼 출력합니다. " + nfe.getMessage());
-        return nfe.getMessage();
+    public ResponseDto handleNotFoundException(NotFoundException nfe){
+        log.error("클라이언트 요청 이후 DB검색 중 발생한 에러입니다. " + nfe.getMessage());
+        return new ResponseDto(HttpStatus.NOT_FOUND.value(),nfe.getMessage());
     }
-
     @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
     @ExceptionHandler(NotAcceptException.class)
-    public String handleNotAcceptException(NotFoundException nae) {
-        log.error("Client 요청이 모종의 이유로 거부됩니다.. " + nae.getMessage());
-        return nae.getMessage();
+    public ResponseDto handleNotAcceptException(NotAcceptException nae){
+        log.error("클라이언트 요청 이후 DB검색 중 발생한 에러입니다. " + nae.getMessage());
+        return new ResponseDto(HttpStatus.NOT_ACCEPTABLE.value(),nae.getMessage());
+    }
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseDto handleAccessDeniedException(AccessDeniedException ade){
+        log.error("Client 요청에 문제가 있어 다음처럼 출력합니다. " + ade.getMessage());
+        return new ResponseDto(HttpStatus.FORBIDDEN.value(),ade.getMessage());
+    }
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(CAuthenticationEntryPointException.class)
+    public ResponseDto handleAuthenticationException(CAuthenticationEntryPointException ae){
+        log.error("Client 요청에 문제가 있어 다음처럼 출력합니다. " + ae.getMessage());
+        return new ResponseDto(HttpStatus.UNAUTHORIZED.value(),ae.getMessage());
     }
 
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(InvalidValueException.class)
-    public String handleInvalidValueException(InvalidValueException ive) {
-        log.error("Client 요청에 문제가 있어 다음처럼 출력합니다. " + ive.getMessage());
-        return ive.getMessage();
-    }
-
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    @ExceptionHandler(Exception.class)
-    public String handleAllExceptions(Exception ex) {
-        log.error("서버 오류 발생: ", ex);
-        return "서버 오류가 발생했습니다. 관리자에게 문의하세요.";
-    }
 
 
 

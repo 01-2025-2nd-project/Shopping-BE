@@ -4,9 +4,11 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
@@ -23,8 +26,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JwtTokenProvider {
 
-    private final String secret = "mySecretKeyForJwtToken1234567890"; // 예제 키, 환경 변수로 교체 권장
-    private final Key secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+    @Value("${jwt.secret-key-source}")
+    private  String secretKeySource;
+    private String secretKey;
+
+    @PostConstruct
+    public void setUp(){
+        secretKey = Base64.getEncoder()
+                .encodeToString(secretKeySource.getBytes());
+    }
     private final long tokenValidMilisecond = 1000L * 60 * 60; // 1시간
 
     private final UserDetailsService userDetailsService;
@@ -46,7 +56,7 @@ public class JwtTokenProvider {
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + tokenValidMilisecond))
-                .signWith(secretKey)
+                .signWith(SignatureAlgorithm.HS256,secretKey)
                 .compact();
     }
 
@@ -87,4 +97,6 @@ public class JwtTokenProvider {
                 .getBody()
                 .getSubject();
     }
+
+
 }

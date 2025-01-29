@@ -27,18 +27,19 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin())) // Frame 옵션 설정
-                .formLogin(formLogin -> formLogin.disable()) // 폼 로그인 비활성화
-                .csrf(csrf -> csrf.disable()) // CSRF 비활성화
-                .httpBasic(httpBasic -> httpBasic.disable()) // HTTP Basic 인증 비활성화
-                .rememberMe(rememberMe -> rememberMe.disable()) // RememberMe 비활성화
-                .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Stateless 세션 설정
+                .headers((h)->h.frameOptions((f)->f.sameOrigin()))
+                .csrf((c)->c.disable())
+                .httpBasic(hb->hb.disable())
+                .formLogin((fl)->fl.disable())
+                .rememberMe((rm)->rm.disable())
+                .sessionManagement(sm->sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/auth/login", "/auth/sign-up", "/auth/test").permitAll() // 로그인과 회원가입 경로는 인증 없이 접근 가능
-                        .anyRequest().authenticated() // 나머지 요청은 인증 필요
+                        .anyRequest().permitAll() // 모든 요청 허용
                 )
-                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class); // JwtAuthenticationFilter 추가
-
+                .exceptionHandling((exception) -> exception
+                        .authenticationEntryPoint(new CustomerAuthenticationEntryPoint())
+                        .accessDeniedHandler(new CustomerAccessDeniedHandler()))
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

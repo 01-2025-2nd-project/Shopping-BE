@@ -2,6 +2,7 @@ package com.github.farmplus.repository.user;
 
 import com.github.farmplus.repository.base.BaseEntity;
 import com.github.farmplus.repository.role.Role;
+import com.github.farmplus.repository.userRole.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -42,20 +43,6 @@ public class User extends BaseEntity {
     @Column(name = "address", length = 255, nullable = true)
     private String address;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "user_role",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private Set<Role> roles;  // 역할 추가
-
-    // 역할 이름을 List<String>으로 반환
-    public List<String> getUserRole() {
-        List<String> roleNames = new ArrayList<>();
-        for (Role role : roles) {
-            roleNames.add(role.getRoleName()); // Role 객체에서 역할 이름을 가져와서 리스트에 추가
-        }
-        return roleNames;
-    }
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<UserRole> userRoles;
 }

@@ -3,7 +3,7 @@ server:
 
 spring:
   datasource:
-    username: yj2678
+    username: root
     password: 12341234
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/farm_plus?useUnicode=true&characterEncoding=UTF-8
@@ -17,5 +17,4 @@ spring:
       io.netty.resolver.dns: DEBUG
 
 jwt:
-  secret: "1r9c!Qz$6Q_7p%Lq8$kdD14b%vS5Xw*8"  # JWT 비밀키
-  expiration: 86400000         # JWT 만료 시간 (예: 1일)
+  secret-key-source: "1r9c!Qz$6Q_7p%Lq8$kdD14b%vS5Xw*8"  # JWT 비밀키
