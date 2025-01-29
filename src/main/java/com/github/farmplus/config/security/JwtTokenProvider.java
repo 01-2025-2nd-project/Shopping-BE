@@ -6,32 +6,35 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 import java.util.List;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtTokenProvider {
 
-    // HS256 알고리즘에 적합한 키 생성
-    private final Key secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-    private long tokenValidMilisecond = 1000L * 60 * 60; // 1시간
+    private final String secret = "mySecretKeyForJwtToken1234567890"; // 예제 키, 환경 변수로 교체 권장
+    private final Key secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+    private final long tokenValidMilisecond = 1000L * 60 * 60; // 1시간
 
     private final UserDetailsService userDetailsService;
 
-    // "X-AUTH-TOKEN" 대신 "Authorization" 헤더에서 JWT를 추출
     public String resolveToken(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
         if (token != null && token.startsWith("Bearer ")) {
-            return token.substring(7); // "Bearer " 접두사를 제거한 토큰 반환
+            return token.substring(7); // "Bearer " 접두사 제거
         }
+        log.warn("Authorization 헤더가 없거나 형식이 올바르지 않음");
         return null;
     }
 
@@ -47,18 +50,29 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // 토큰 검증 메소드에서 예외를 더 구체적으로 처리
     public boolean validateToken(String jwtToken) {
         try {
-            Claims claims = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(jwtToken).getBody();
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(jwtToken)
+                    .getBody();
             Date now = new Date();
-            return !claims.getExpiration().before(now);
+            if (claims.getExpiration().before(now)) {
+                log.warn("JWT 만료됨");
+                return false;
+            }
+            return true;
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            log.warn("JWT 만료됨: ", e);
+        } catch (io.jsonwebtoken.SignatureException | io.jsonwebtoken.MalformedJwtException e) {
+            log.error("JWT 서명 또는 형식 오류: ", e);
         } catch (Exception e) {
-            return false; // 예외가 발생하면 토큰이 유효하지 않다고 간주
+            log.error("JWT 검증 중 오류 발생: ", e);
         }
+        return false;
     }
 
-    // 토큰을 이용해 인증 객체 반환
     public Authentication getAuthentication(String jwtToken) {
         String email = getUserEmail(jwtToken);
         UserDetails userDetails = userDetailsService.loadUserByUsername(email);
@@ -66,6 +80,11 @@ public class JwtTokenProvider {
     }
 
     private String getUserEmail(String jwtToken) {
-        return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(jwtToken).getBody().getSubject();
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(jwtToken)
+                .getBody()
+                .getSubject();
     }
 }
