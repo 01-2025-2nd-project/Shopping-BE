@@ -30,7 +30,7 @@ public class User extends BaseEntity {
     @Column(name = "name", length = 50, nullable = false)
     private String name;
 
-    @Column(name = "nickname", length = 50)
+    @Column(name = "nickname", length = 50, nullable = false)
     private String nickname;
 
     @Column(name = "email", length = 100, nullable = false)
@@ -39,10 +39,10 @@ public class User extends BaseEntity {
     @Column(name = "password", length = 100, nullable = false)
     private String password;
 
-    @Column(name = "phone_number", length = 11, nullable = false)
+    @Column(name = "phone_number", length = 11, nullable = true)
     private String phoneNumber;
 
-    @Column(name = "address", length = 255, nullable = false)
+    @Column(name = "address", length = 255, nullable = true)
     private String address;
 
     @ManyToMany(fetch = FetchType.LAZY)
