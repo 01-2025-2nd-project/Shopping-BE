@@ -20,8 +20,9 @@ public class Role {
     @Column(name="role_name", length = 20, nullable = false)
     private String roleName;
 
-    // 추가된 역할 이름 반환 메서드
-    public String getRoleName() {
-        return this.roleName;
-    }
+//    // 추가된 역할 이름 반환 메서드
+//    public String getRoleName() {
+//        return this.roleName;
+//    }
+
 }

@@ -2,11 +2,16 @@ package com.github.farmplus.repository.user;
 
 import com.github.farmplus.repository.base.BaseEntity;
 import com.github.farmplus.repository.role.Role;
+import com.github.farmplus.repository.userRole.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Getter
 @AllArgsConstructor
@@ -40,7 +45,7 @@ public class User extends BaseEntity {
     @Column(name = "address", length = 255, nullable = false)
     private String address;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "user_role",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -48,12 +53,21 @@ public class User extends BaseEntity {
     )
     private Set<Role> roles;  // 역할 추가
 
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
+//    public void setRoles(Set<Role> roles) {
+//        this.roles = roles;
+//    }
+//
+//    // 비밀번호를 암호화된 값으로 설정
+//    public void setPassword(String password) {
+//        this.password = password;
+//    }
+
+
+    public List<String> getUserRole() {
+        return (List<String>) this.roles.stream()
+                .map(Role::getRoleName)  // Role의 name을 반환
+                .collect(Collectors.toSet());
     }
 
-    // 비밀번호를 암호화된 값으로 설정
-    public void setPassword(String password) {
-        this.password = password;
-    }
+
 }
