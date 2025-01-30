@@ -18,3 +18,19 @@ spring:
 
 jwt:
   secret-key-source: "1r9c!Qz$6Q_7p%Lq8$kdD14b%vS5Xw*8"  # JWT 비밀키
+
+security:
+  oauth2:
+    client:
+      registration:
+        kakao:
+          client-id: YOUR_KAKAO_REST_API_KEY  # 카카오 REST API 키
+          client-authentication-method: post
+          authorization-grant-type: authorization_code
+          redirect-uri: "{baseUrl}/auth/kakao/callback"
+          scope: profile_nickname, account_email
+      provider:
+        kakao:
+          authorization-uri: https://kauth.kakao.com/oauth/authorize
+          token-uri: https://kauth.kakao.com/oauth/token
+          user-info-uri: https://kapi.kakao.com/v2/user/me
