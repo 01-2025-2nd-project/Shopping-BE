@@ -16,13 +16,14 @@ import lombok.*;
 public class PartyUser {
     @Id@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "party_user_id")
-    private Integer partyUserId;
+    private Long partyUserId;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "party_id",nullable = false)
     private Party party;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+    @Enumerated(EnumType.STRING)
     @Column(name = "party_role",nullable = false)
     private PartyRole partyRole;
 

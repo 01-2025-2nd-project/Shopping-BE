@@ -1,12 +1,15 @@
 package com.github.farmplus.repository.party;
 
 import com.github.farmplus.repository.base.BaseEntity;
+import com.github.farmplus.repository.partyUser.PartyUser;
 import com.github.farmplus.repository.product.Product;
+import com.github.farmplus.repository.product_discount.ProductDiscount;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.cglib.core.Local;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @AllArgsConstructor
@@ -19,13 +22,24 @@ import java.time.LocalDate;
 public class Party extends BaseEntity {
     @Id@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "party_id")
-    private Integer partyId;
+    private Long partyId;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_discount_id", nullable = false)
+    private ProductDiscount productDiscount;
     @Column(name = "party_name",nullable = false,length = 255)
     private String partyName;
     @Column(name = "end_date",nullable = false)
     private LocalDate endDate;
+    @Enumerated(EnumType.STRING) // Enum 타입으로 저장
+    @Column(name = "status", nullable = false)
+    private PartyStatus status;
+    @Column(name = "capacity", nullable = false)
+    private Integer capacity;
+    @OneToMany(mappedBy = "party")
+    private List<PartyUser> partyUserList;
+
 
 }

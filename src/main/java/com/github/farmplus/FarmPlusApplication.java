@@ -18,14 +18,14 @@ public class FarmPlusApplication {
 	}
 
 	// CommandLineRunner를 사용하여 비밀번호 암호화 실행
-	@Bean
-	public CommandLineRunner run() {
-		return args -> {
-			PasswordEncoder encoder = new BCryptPasswordEncoder();
-			String rawPassword = "test1234"; // 원본 비밀번호
-			String encodedPassword = encoder.encode(rawPassword); // 암호화된 비밀번호
-			System.out.println("Encoded password: " + encodedPassword); // 출력
-		};
-	}
+//	@Bean
+//	public CommandLineRunner run() {
+//		return args -> {
+//			PasswordEncoder encoder = new BCryptPasswordEncoder();
+//			String rawPassword = "test1234"; // 원본 비밀번호
+//			String encodedPassword = encoder.encode(rawPassword); // 암호화된 비밀번호
+//			System.out.println("Encoded password: " + encodedPassword); // 출력
+//		};
+//	}
 
 }
