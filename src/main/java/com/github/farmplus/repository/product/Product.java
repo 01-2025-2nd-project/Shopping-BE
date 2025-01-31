@@ -3,6 +3,7 @@ package com.github.farmplus.repository.product;
 import com.github.farmplus.repository.base.BaseEntity;
 import com.github.farmplus.repository.category.Category;
 import com.github.farmplus.repository.order.Order;
+import com.github.farmplus.repository.party.Party;
 import com.github.farmplus.web.dto.product.request.ProductRegister;
 import jakarta.persistence.*;
 import lombok.*;
@@ -32,6 +33,8 @@ public class Product extends BaseEntity {
     private Long stock;
     @OneToMany(mappedBy = "product")
     private List<Order> orders;
+    @OneToMany(mappedBy = "product")
+    private List<Party> parties;
 
     public static Product of(ProductRegister productRegister,Category category){
         return Product.builder()
