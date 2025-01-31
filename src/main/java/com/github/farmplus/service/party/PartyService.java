@@ -7,6 +7,7 @@ import com.github.farmplus.repository.party.PartyRepository;
 import com.github.farmplus.repository.party.PartyStatus;
 import com.github.farmplus.repository.partyUser.PartyRole;
 import com.github.farmplus.repository.partyUser.PartyUser;
+import com.github.farmplus.repository.partyUser.PartyUserAmount;
 import com.github.farmplus.repository.partyUser.PartyUserRepository;
 import com.github.farmplus.repository.product.Product;
 import com.github.farmplus.repository.product.ProductRepository;
@@ -64,8 +65,10 @@ public class PartyService {
         return new ResponseDto(HttpStatus.OK.value(),"조회 성공",parties);
 
     }
+    @Transactional
     public ResponseDto makePartyResult(CustomUserDetails customUserDetails, MakeParty makeParty) {
         User user = tokenUser(customUserDetails);
+        log.info("유저 : " +user);
         Integer discountId = makeParty.getOptionId();
         String productName = makeParty.getProductName();
         //상품과 할인 존재하는지 확인
@@ -75,10 +78,15 @@ public class PartyService {
         // 등록하려는 파티의 모집인원 수와 구매개수를 곱한 값이 상품의 현재 수량보다 많다면 구매 불가
         Long buyCapacity = (long) makeParty.getCapacity() * discount.getPeople();
         validateStockAvailability(product,buyCapacity);
-
+        Double salePrice = product.getPrice() -( product.getPrice() * discount.getDiscountRate());
+        Double saleTotalPrice = salePrice * makeParty.getCapacity();
+        if ( saleTotalPrice > user.getMoney() ){
+            throw new BadRequestException("현재 구매하려는 가격 : " +saleTotalPrice +" 현재 가지고 있는 돈 : " + user.getMoney() +"이므로 파티 등록이 불가능합니다.");
+        }
+        user.updateMoney(user.getMoney() - saleTotalPrice);
         Party party = Party.of(product,productDiscount,makeParty);
         Party saveParty = partyRepository.save(party);
-        PartyUser partyUser = PartyUser.host(user,saveParty);
+        PartyUser partyUser = PartyUser.host(user,saveParty,saleTotalPrice);
         partyUserRepository.save(partyUser);
 
         return new ResponseDto(HttpStatus.OK.value(),"파티 등록이 되었습니다.");
@@ -107,9 +115,52 @@ public class PartyService {
         Long buyCapacity = (long) makeParty.getCapacity() * discount.getPeople();
         validateStockAvailability(product,buyCapacity);
 
-        Party updateParty = party.updateDetails(product,productDiscount,makeParty);
-        List<PartyUser> partyUsers = partyUserRepository.findAllByParty(updateParty);
+        Double salePrice = product.getPrice() -( product.getPrice() * discount.getDiscountRate());
+        final Double saleTotalPrice = salePrice * makeParty.getCapacity();
 
+
+
+        List<PartyUserAmount> partyUsers = partyUserRepository.findPartyUserAmounts(party);
+        log.info("partyUser : " + partyUsers);
+        boolean isInsufficientFunds = partyUsers.stream()
+                .anyMatch(partyUser -> partyUser.getTotalAmount() < saleTotalPrice);
+
+        if (isInsufficientFunds) {
+            throw new BadRequestException("파티원 중 한 명이 금액이 부족하여 파티 업데이트가 불가능합니다.");
+        }
+        Double payment = partyUsers.get(0).getPaymentAmount();
+        //유저 돈에 더해줄 가격
+        final Double userMoney;
+        //바꾸려는 가격이 지불한 금액보다 작은 경우
+        if (saleTotalPrice < payment){
+            userMoney = payment - saleTotalPrice;
+        }
+        //바꾸려는 가격이 지불 금액보다 큰 경우
+        else if (saleTotalPrice > payment){
+            userMoney = saleTotalPrice - payment;
+        }
+        else{
+            userMoney = 0.0;
+        }
+        List<PartyUser> partyUserList = partyUserRepository.findAllByParty(party);
+        List<User> userList = partyUserList.stream().map(PartyUser::getUser).toList();
+
+        partyUserList.forEach(partyUser -> {
+            User updateUser = partyUser.getUser();
+
+            // User의 money 업데이트
+            updateUser.updateMoney(user.getMoney() + userMoney);
+
+            // PartyUser의 paymentAmount 업데이트
+            partyUser.updatePaymentAmount(saleTotalPrice);
+        });
+
+
+
+
+
+
+        Party updateParty = party.updateDetails(product,productDiscount,makeParty);
 
 
         return new ResponseDto(HttpStatus.OK.value(),"파티 정보가 변경되었습니다.");
@@ -119,10 +170,12 @@ public class PartyService {
     * 토큰에 해당하는 유저 찾기 메소드
     * */
     public User tokenUser(CustomUserDetails customUserDetails){
+        log.info("tokenUser 메서드 시작");
         String email = customUserDetails.getUsername();
-        return userRepository.findByEmailFetchJoin(email)
+        User user = userRepository.findByEmailFetchJoin(email)
                 .orElseThrow(()-> new NotFoundException(email + "에 해당하는 유저가 존재하지 않습니다."));
-
+        log.info("tokenUser 메서드 끝");
+        return  user;
     }
     /**
      * 상품/할인/상품에 해당하는 할인/파티 찾기 찾기/파티 유저 찾기

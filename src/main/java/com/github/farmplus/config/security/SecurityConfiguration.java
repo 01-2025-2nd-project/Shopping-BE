@@ -19,10 +19,7 @@ public class SecurityConfiguration {
 
     private final JwtTokenProvider jwtTokenProvider; // JwtAuthenticationFilter 생성에 필요
 
-    @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter(jwtTokenProvider);
-    }
+
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {

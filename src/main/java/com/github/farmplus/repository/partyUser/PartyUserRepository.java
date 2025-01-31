@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -21,4 +22,9 @@ public interface PartyUserRepository extends JpaRepository<PartyUser,Long> {
             "LEFT JOIN FETCH p.partyUserList " +
             "WHERE pu.user = :user")
     List<PartyUser> findAllByUser(User user);
+
+    @Query("SELECT new com.github.farmplus.repository.partyUser.PartyUserAmount(pu.user.userId, pu.paymentAmount, pu.user.money, pu.paymentAmount + pu.user.money) " +
+            "FROM PartyUser pu WHERE pu.party = :party")
+    List<PartyUserAmount> findPartyUserAmounts(@Param("party") Party party);
+
 }

@@ -26,13 +26,19 @@ public class PartyUser {
     @Enumerated(EnumType.STRING)
     @Column(name = "party_role",nullable = false)
     private PartyRole partyRole;
+    @Column(name = "payment_amount")
+    private Double paymentAmount;
 
-    public static PartyUser host(User user,Party party){
+    public static PartyUser host(User user,Party party,Double paymentAmount){
         return PartyUser.builder()
                 .party(party)
                 .user(user)
                 .partyRole(PartyRole.HOST)
+                .paymentAmount(paymentAmount)
                 .build();
+    }
+    public void updatePaymentAmount(Double paymentAmount){
+        this.paymentAmount = paymentAmount;
     }
 
 
