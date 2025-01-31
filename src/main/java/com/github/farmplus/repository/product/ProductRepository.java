@@ -1,14 +1,18 @@
 package com.github.farmplus.repository.product;
 
 import com.github.farmplus.repository.category.Category;
+import com.github.farmplus.repository.product_discount.ProductDiscount;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface ProductRepository extends JpaRepository<Product,Long> {
+    Optional<Product> findByProductName(String productName);
 //    Page<Product> findAllByCategory(Category category);
     //전체 일 때 생성일 순
     @Query("SELECT new com.github.farmplus.repository.product.ProductWithOrderAndParty(p, COUNT(DISTINCT o), COUNT(DISTINCT pa)) " +

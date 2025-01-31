@@ -17,10 +17,10 @@ public class UserRole{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="user_role_id")
     private Integer userRoleId;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 

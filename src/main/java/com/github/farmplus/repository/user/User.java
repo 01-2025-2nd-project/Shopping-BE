@@ -42,6 +42,8 @@ public class User extends BaseEntity {
 
     @Column(name = "address", length = 255, nullable = true)
     private String address;
+    @Column(name = "money", nullable = true)
+    private Long money;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,orphanRemoval = true, fetch = FetchType.EAGER)
     private List<UserRole> userRoles;

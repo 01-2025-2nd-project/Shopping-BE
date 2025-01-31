@@ -1,8 +1,6 @@
 package com.github.farmplus.web.advice;
 
-import com.github.farmplus.service.exceptions.CAuthenticationEntryPointException;
-import com.github.farmplus.service.exceptions.NotAcceptException;
-import com.github.farmplus.service.exceptions.NotFoundException;
+import com.github.farmplus.service.exceptions.*;
 import com.github.farmplus.web.dto.base.ResponseDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
@@ -23,6 +21,31 @@ public class ExceptionControllerAdvice {
         log.error("클라이언트 요청 이후 DB검색 중 발생한 에러입니다. " + nfe.getMessage());
         return new ResponseDto(HttpStatus.NOT_FOUND.value(),nfe.getMessage());
     }
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(StockShortageException.class)
+    public ResponseDto handleStockShortageException(StockShortageException sse){
+        log.error("클라이언의 요청이 잘못되어 발생한 에러입니다. " + sse.getMessage());
+        return new ResponseDto(HttpStatus.BAD_REQUEST.value(), sse.getMessage());
+    }
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(InvalidDateException.class)
+    public ResponseDto handleInvalidDateException(InvalidDateException ide){
+        log.error("클라이언의 요청이 잘못되어 발생한 에러입니다. " + ide.getMessage());
+        return new ResponseDto(HttpStatus.BAD_REQUEST.value(), ide.getMessage());
+    }
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseDto handleBadRequestException(BadRequestException bre){
+        log.error("클라이언의 요청이 잘못되어 발생한 에러입니다. " + bre.getMessage());
+        return new ResponseDto(HttpStatus.BAD_REQUEST.value(), bre.getMessage());
+    }
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(UnauthorizedDeleteException.class)
+    public ResponseDto handleUnauthorizedDeleteException(UnauthorizedDeleteException ude){
+        log.error("클라이언트의 것이 아니어서 발생한 에러입니다." + ude.getMessage());
+        return new ResponseDto(HttpStatus.UNAUTHORIZED.value(), ude.getMessage());
+    }
+
     @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
     @ExceptionHandler(NotAcceptException.class)
     public ResponseDto handleNotAcceptException(NotAcceptException nae){

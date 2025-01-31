@@ -4,6 +4,7 @@ import com.github.farmplus.repository.base.BaseEntity;
 import com.github.farmplus.repository.partyUser.PartyUser;
 import com.github.farmplus.repository.product.Product;
 import com.github.farmplus.repository.product_discount.ProductDiscount;
+import com.github.farmplus.web.dto.party.request.MakeParty;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.cglib.core.Local;
@@ -42,4 +43,24 @@ public class Party extends BaseEntity {
     private List<PartyUser> partyUserList;
 
 
+    public static Party of(Product product, ProductDiscount productDiscount,MakeParty makeParty){
+        return Party.builder()
+                .product(product)
+                .productDiscount(productDiscount)
+                .partyName(makeParty.getPartyName())
+                .endDate(makeParty.getEndDate())
+                .status(PartyStatus.RECRUITING)
+                .capacity(makeParty.getCapacity())
+                .build();
+
+    }
+    public Party updateDetails(Product product, ProductDiscount productDiscount, MakeParty makeParty) {
+        this.product = product;
+        this.productDiscount = productDiscount;
+        this.partyName = makeParty.getPartyName();
+        this.endDate = makeParty.getEndDate();
+        this.status = PartyStatus.RECRUITING;
+        this.capacity = makeParty.getCapacity();
+        return this;
+    }
 }
