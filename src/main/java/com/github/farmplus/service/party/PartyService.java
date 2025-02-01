@@ -2,6 +2,8 @@ package com.github.farmplus.service.party;
 
 import com.github.farmplus.repository.discount.Discount;
 import com.github.farmplus.repository.discount.DiscountRateRepository;
+import com.github.farmplus.repository.order.Order;
+import com.github.farmplus.repository.order.OrderRepository;
 import com.github.farmplus.repository.party.Party;
 import com.github.farmplus.repository.party.PartyRepository;
 import com.github.farmplus.repository.party.PartyStatus;
@@ -49,6 +51,7 @@ public class PartyService {
     private final ProductRepository productRepository;
     private final DiscountRateRepository discountRateRepository;
     private final ProductDiscountRepository productDiscountRepository;
+    private final OrderRepository orderRepository;
     public ResponseDto getMyPartyResult(CustomUserDetails customUserDetails, Integer pageNum) {
 
         User user = tokenUser(customUserDetails);
@@ -64,6 +67,26 @@ public class PartyService {
         Page<MyParty> parties = new PageImpl<>(pageContent, pageable, myParties.size());
         return new ResponseDto(HttpStatus.OK.value(),"조회 성공",parties);
 
+    }
+    @Transactional
+    public ResponseDto deletePartyResult(CustomUserDetails customUserDetails, Long partyId) {
+        //토큰으로 유저 찾기
+        User user = tokenUser(customUserDetails);
+        log.info("유저 찾기");
+        //파티 찾기
+        Party party = findPartyById(partyId);
+        log.info("파티 찾기");
+        //삭제하려는 유저가 파티장인지 확인
+        Boolean isHost = isCheckHost(user,party);
+        if (!isHost){
+            throw new UnauthorizedDeleteException(partyId +"는 유저 " + user.getName() + "이 HOST가 아니어서 변경 불가능합니다.");
+        }
+        log.info("host인지 확인");
+        // 파티 상태에 따라 다르기
+        // 1) 완료 실패인 경우 : 파티 삭제 시 order부분에 partyId null(완료인 경우만)로 지정, PartyUser리스트 지우기, Party지우기
+        // 2) 진행 중인 경우 : 파티 삭제 시 유저에게 money 다시, PartyUser리스트 지우기, Party지우기
+        deletePartyUpdateByPartyStatus(party);
+        return new ResponseDto(HttpStatus.OK.value(),"파티가 삭제되었습니다.");
     }
     @Transactional
     public ResponseDto makePartyResult(CustomUserDetails customUserDetails, MakeParty makeParty) {
@@ -118,20 +141,113 @@ public class PartyService {
         Double salePrice = product.getPrice() -( product.getPrice() * discount.getDiscountRate());
         final Double saleTotalPrice = salePrice * makeParty.getCapacity();
 
-
-
         List<PartyUserAmount> partyUsers = partyUserRepository.findPartyUserAmounts(party);
         log.info("partyUser : " + partyUsers);
-        boolean isInsufficientFunds = partyUsers.stream()
-                .anyMatch(partyUser -> partyUser.getTotalAmount() < saleTotalPrice);
+        checkPartyUserMoney(partyUsers,saleTotalPrice);
 
-        if (isInsufficientFunds) {
-            throw new BadRequestException("파티원 중 한 명이 금액이 부족하여 파티 업데이트가 불가능합니다.");
-        }
         Double payment = partyUsers.get(0).getPaymentAmount();
         //유저 돈에 더해줄 가격
-        final Double userMoney;
         //바꾸려는 가격이 지불한 금액보다 작은 경우
+        final Double userMoney =checkUserMoney(saleTotalPrice,payment);
+
+        List<PartyUser> partyUserList = partyUserRepository.findAllByParty(party);
+
+        updatePartyUserMoney(partyUserList,saleTotalPrice,userMoney);
+
+        party.updateDetails(product,productDiscount,makeParty);
+
+        return new ResponseDto(HttpStatus.OK.value(),"파티 정보가 변경되었습니다.");
+
+    }
+    @Transactional
+    public ResponseDto joinPartyResult(CustomUserDetails customUserDetails, Long partyId) {
+        User user =tokenUser(customUserDetails);
+        Party party = partyRepository.findByIdWithLock(partyId)
+                .orElseThrow(()-> new NotFoundException(partyId + "에 해당하는 파티를 찾을 수 없습니다."));
+        List<PartyUser> partyUsers = partyUserRepository.findAllByParty(party);
+        ProductDiscount productDiscount = party.getProductDiscount();
+        Discount discount = productDiscount.getDiscount();
+        Double payment = partyUsers.get(0).getPaymentAmount();
+        //파티 참여 시 파티 상태가 실패/완료면 참여 불가
+        checkPartyStatus(party);
+        //유저 머니 검사
+        joinPartyByUserMoneyCheck(user,payment);
+        //해당 파티에 이미 참여한 파티 유저인지 확인
+        isCheckAlreadyParty(user,party);
+        //파티 참여 시 유저 머니 차감
+        //파티 참여 시 마지막 파티원이면 자동으로 구매 유저 머니 차감
+        //파티 참여시 동시성 고려
+        user.updateMoney(user.getMoney()-payment);
+        PartyUser joinPartyUser = PartyUser.member(user,party,payment);
+        partyUserRepository.save(joinPartyUser);
+        if ( partyUsers.size() == (discount.getPeople() - 1) ){
+            //동시성 문제로 인해 Lock 적용
+            isCheckProductStock(party,discount);
+            List<PartyUser> updatePartyUserList = partyUserRepository.findAllByParty(party);
+            log.info("구매로 넘어가기 전");
+            List<Order> orders = updatePartyUserList.stream().map(Order::of).toList();
+            //구매로 넘어갈 시 동시성 고려
+            log.info("구매로 넘어간 후");
+
+            party.updatePartyStatus(PartyStatus.COMPLETED);
+            orderRepository.saveAll(orders);
+            return new ResponseDto(HttpStatus.CREATED.value(),"파티 마지막 참여자이므로 결제 완료되었습니다..");
+        }
+
+
+        return new ResponseDto(HttpStatus.CREATED.value(),"파티 참여에 성공했습니다.");
+    }
+    @Transactional
+    public ResponseDto deleteJoinPartyResult(CustomUserDetails customUserDetails, Long partyId) {
+        User user = tokenUser(customUserDetails);
+        Party party = findPartyById(partyId);
+        List<PartyUser> partyUsers = partyUserRepository.findAllByParty(party);
+        List<User> partyUserList = partyUsers.stream().map(PartyUser::getUser).toList();
+        //파티에 유저가 가입되어 있는지 확인
+        if (!partyUserList.contains(user)){
+            throw new NotFoundException("해당 파티에 유저 : " + user.getName() +"는(은) 가입되어 있지 않습니다.");
+        }
+        //파티장은 탈퇴가 아닌 직접 파티를 삭제하도록 예외 안내 메시지처리(why? : 파티원들이 있는데 탈퇴하는 건 안되는 일이기 때문이다)
+        PartyUser partyUser = partyUserRepository.findByUserAndParty(user,party)
+                .orElseThrow(()-> new NotFoundException("파티 : " + party.getPartyName() + "에 참여하지 않았습니다."));
+        if (partyUser.getPartyRole().equals(PartyRole.HOST)){
+            throw new BadRequestException("HOST는 파티 나가기가 아닌 파티 삭제를 이용해주세요");
+        }
+        //파티 상태 확인
+        checkPartyStatus(party);
+        //파티 탈퇴 설계
+        //해당 파티에서 PartyUser리스트에서 해당 유저 지우기
+        partyUserRepository.deleteByUserAndParty(user,party);
+        //원래 돈 복귀시키기
+        user.updateMoney(user.getMoney() + partyUsers.get(0).getPaymentAmount());
+        return new ResponseDto(HttpStatus.OK.value(),"파티 탈퇴가 되었습니다.");
+
+
+    }
+    /**
+     * --------------------------------메소드----------------------------------------------------
+     * */
+    /**
+     * 계산한 userMoney 업데이트 시키기
+     * */
+    private void updatePartyUserMoney(List<PartyUser> partyUserList,Double userMoney,Double saleTotalPrice){
+        partyUserList.forEach(partyUser -> {
+            User updateUser = partyUser.getUser();
+
+            // User의 money 업데이트
+            updateUser.updateMoney(updateUser.getMoney() + userMoney);
+
+            // PartyUser의 paymentAmount 업데이트
+            partyUser.updatePaymentAmount(saleTotalPrice);
+        });
+
+    }
+
+    /**
+     *  변경 사항에 따라 userMoney 더해줄 값 return하는 메소드
+     * */
+    private Double checkUserMoney(Double saleTotalPrice, Double payment){
+        Double userMoney;
         if (saleTotalPrice < payment){
             userMoney = payment - saleTotalPrice;
         }
@@ -142,30 +258,22 @@ public class PartyService {
         else{
             userMoney = 0.0;
         }
-        List<PartyUser> partyUserList = partyUserRepository.findAllByParty(party);
-        List<User> userList = partyUserList.stream().map(PartyUser::getUser).toList();
-
-        partyUserList.forEach(partyUser -> {
-            User updateUser = partyUser.getUser();
-
-            // User의 money 업데이트
-            updateUser.updateMoney(user.getMoney() + userMoney);
-
-            // PartyUser의 paymentAmount 업데이트
-            partyUser.updatePaymentAmount(saleTotalPrice);
-        });
-
-
-
-
-
-
-        Party updateParty = party.updateDetails(product,productDiscount,makeParty);
-
-
-        return new ResponseDto(HttpStatus.OK.value(),"파티 정보가 변경되었습니다.");
-
+        return userMoney;
     }
+
+    /**
+     * 파티원 중 금액이 부족한 사람이 있는지 확인하는 메소드
+     * */
+
+    private void checkPartyUserMoney(List<PartyUserAmount> partyUsers, Double saleTotalPrice){
+        boolean isInsufficientFunds = partyUsers.stream()
+                .anyMatch(partyUser -> partyUser.getTotalAmount() < saleTotalPrice);
+
+        if (isInsufficientFunds) {
+            throw new BadRequestException("파티원 중 한 명이 금액이 부족하여 파티 업데이트가 불가능합니다.");
+        }
+    }
+
     /*
     * 토큰에 해당하는 유저 찾기 메소드
     * */
@@ -225,6 +333,74 @@ public class PartyService {
 
 
 
+    /**
+     * 파티상태에 따라 삭제 메소드
+     * */
+    public void deletePartyUpdateByPartyStatus(Party party){
+        List<PartyUser> partyUserList = partyUserRepository.findAllByParty(party);
+
+        switch (party.getStatus()){
+            case COMPLETED -> {
+                List<Order> ordersByParty = orderRepository.findAllByParty(party);
+                ordersByParty.stream().forEach((order)->order.updateParty(null));
+            }
+            case RECRUITING -> {
+                Double payment =partyUserList.get(0).getPaymentAmount();
+                List<User> userList = partyUserList.stream().map(PartyUser::getUser).toList();
+                userList.stream().forEach((user)->user.updateMoney( user.getMoney() + payment));
+            }
+        }
+        partyUserRepository.deleteAll(partyUserList);
+        partyRepository.delete(party);
+
+    }
+
+
+    /**
+     * 현재 상품 수량과 비교하기
+     * */
+
+
+    @Transactional
+    public void isCheckProductStock(Party party, Discount discount) {
+        Product product = productRepository.findByIdWithLock(party.getProduct().getProductId())
+                .orElseThrow(() -> new NotFoundException("파티에 해당하는 상품을 찾을 수 없습니다."));
+
+        long requiredStock = (long) party.getCapacity() * discount.getPeople();
+        if (requiredStock > product.getStock()) {
+            party.updatePartyStatus(PartyStatus.FAILED);
+            throw new StockShortageException("현재 상품 " + product.getProductName() + "은(는) 재고 부족으로 구매가 불가합니다.");
+        }
+
+        // 재고 업데이트
+        product.updateStock(product.getStock() - requiredStock);
+    }
+    /**
+     * 이미 참여한 파티인지 확인
+     * */
+    private void isCheckAlreadyParty(User user, Party party){
+        List<PartyUser> partyUsers = partyUserRepository.findAllByParty(party);
+        List<User> users = partyUsers.stream().map(PartyUser::getUser).toList();
+        if (users.contains(user)){
+            throw new BadRequestException("이미 참여한 파티입니다.");
+        }
+    }
+    /**
+     * 파티 상태 확인
+     * */
+    private void checkPartyStatus(Party party){
+        if (!party.getStatus().equals(PartyStatus.RECRUITING)){
+            throw new BadRequestException("완료 또는 실패한 파티에는 참여 또는 나가기가 불가능 합니다.");
+        }
+    }
+    /**
+     * 참여하려는 파티 유저 돈 체크
+     * */
+    private void joinPartyByUserMoneyCheck(User user, Double payment){
+        if (user.getMoney() < payment){
+            throw new BadRequestException("현재 지불해야 하는 금액 : " + payment + "/ user 금액 : " + user.getMoney() + "이므로 파티 참여 불가능합니다.");
+        }
+    }
 
 
 }

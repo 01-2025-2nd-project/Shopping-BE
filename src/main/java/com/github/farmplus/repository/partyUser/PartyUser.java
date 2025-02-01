@@ -29,6 +29,15 @@ public class PartyUser {
     @Column(name = "payment_amount")
     private Double paymentAmount;
 
+    public static PartyUser member(User user,Party party,Double paymentAmount){
+        return PartyUser.builder()
+                .party(party)
+                .user(user)
+                .partyRole(PartyRole.MEMBER)
+                .paymentAmount(paymentAmount)
+                .build();
+    }
+
     public static PartyUser host(User user,Party party,Double paymentAmount){
         return PartyUser.builder()
                 .party(party)

@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PartyUserRepository extends JpaRepository<PartyUser,Long> {
@@ -26,5 +27,8 @@ public interface PartyUserRepository extends JpaRepository<PartyUser,Long> {
     @Query("SELECT new com.github.farmplus.repository.partyUser.PartyUserAmount(pu.user.userId, pu.paymentAmount, pu.user.money, pu.paymentAmount + pu.user.money) " +
             "FROM PartyUser pu WHERE pu.party = :party")
     List<PartyUserAmount> findPartyUserAmounts(@Param("party") Party party);
+
+    void deleteByUserAndParty(User user,Party party);
+    Optional<PartyUser> findByUserAndParty(User user, Party party);
 
 }

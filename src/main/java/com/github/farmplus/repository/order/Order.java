@@ -2,6 +2,7 @@ package com.github.farmplus.repository.order;
 
 import com.github.farmplus.repository.base.BaseEntity;
 import com.github.farmplus.repository.party.Party;
+import com.github.farmplus.repository.partyUser.PartyUser;
 import com.github.farmplus.repository.product.Product;
 import com.github.farmplus.repository.user.User;
 import jakarta.persistence.*;
@@ -12,7 +13,7 @@ import java.time.LocalDate;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
+
 @EqualsAndHashCode(of="orderId")
 @Builder
 @Entity
@@ -33,9 +34,24 @@ public class Order extends BaseEntity {
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
     @Column(name = "price", nullable = false)
-    private Integer price;
+    private Long price;
     @Column(name = "final_price", nullable = false)
     private Double finalPrice;
+
+    public static Order of(PartyUser partyUser){
+        return Order.builder()
+                .user(partyUser.getUser())
+                .product(partyUser.getParty().getProduct())
+                .party(partyUser.getParty())
+                .quantity(partyUser.getParty().getCapacity())
+                .price(partyUser.getParty().getCapacity() * partyUser.getParty().getProduct().getPrice())
+                .finalPrice(partyUser.getPaymentAmount())
+                .build();
+    }
+
+    public void updateParty(Party party){
+        this.party = party;
+    }
 
 
 }

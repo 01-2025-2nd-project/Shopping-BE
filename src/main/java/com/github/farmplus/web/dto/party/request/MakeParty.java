@@ -17,7 +17,7 @@ public class MakeParty {
     private final LocalDate endDate;
     private final Integer capacity;
     @Builder
-    MakeParty(String partyName,Integer optionId, String productName, LocalDate endDate, Integer capacity){
+    public MakeParty(String partyName,Integer optionId, String productName, LocalDate endDate, Integer capacity){
         LocalDate now = LocalDate.now();
         if (endDate.isBefore(now) || endDate.isEqual(now)){
             throw new InvalidDateException("현재날짜이거나 현재 날짜보다 이전입니다.");

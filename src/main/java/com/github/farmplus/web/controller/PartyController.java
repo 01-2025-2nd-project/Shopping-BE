@@ -33,4 +33,19 @@ public class PartyController {
                                    @PathVariable("partyId")Long partyId){
         return partyService.updatePartyResult(customUserDetails,makeParty,partyId);
     }
+    @DeleteMapping("/{partyId}")
+    public ResponseDto deleteParty(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                   @PathVariable("partyId")Long partyId){
+        return partyService.deletePartyResult(customUserDetails,partyId);
+    }
+    @PostMapping("/{partyId}/join")
+    public ResponseDto joinParty(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                 @PathVariable("partyId") Long partyId){
+        return partyService.joinPartyResult(customUserDetails,partyId);
+    }
+    @DeleteMapping("/{partyId}/join")
+    public ResponseDto deleteJoinParty(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                       @PathVariable("partyId") Long partyId){
+        return partyService.deleteJoinPartyResult(customUserDetails,partyId);
+    }
 }

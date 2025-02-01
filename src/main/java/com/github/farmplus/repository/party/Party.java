@@ -54,13 +54,16 @@ public class Party extends BaseEntity {
                 .build();
 
     }
-    public Party updateDetails(Product product, ProductDiscount productDiscount, MakeParty makeParty) {
+    public void updateDetails(Product product, ProductDiscount productDiscount, MakeParty makeParty) {
         this.product = product;
         this.productDiscount = productDiscount;
         this.partyName = makeParty.getPartyName();
         this.endDate = makeParty.getEndDate();
         this.status = PartyStatus.RECRUITING;
         this.capacity = makeParty.getCapacity();
-        return this;
+
+    }
+    public void updatePartyStatus(PartyStatus partyStatus){
+        this.status = partyStatus;
     }
 }

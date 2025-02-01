@@ -2,8 +2,6 @@ package com.github.farmplus.repository.party;
 
 import com.github.farmplus.repository.product.Product;
 import jakarta.persistence.LockModeType;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -19,7 +17,7 @@ public interface PartyRepository extends JpaRepository<Party,Long> {
     @Query("SELECT p FROM Party p JOIN FETCH p.partyUserList WHERE p.product = :product")
     List<Party> findAllByProductWithUsers(Product product);
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT p FROM Party p WHERE p.partyId = :partyId")
-    Optional<Party> findByIdWithLock(@Param("partyId") Long partyId);
+    @Query("SELECT p FROM Party p WHERE p.partyId = :partyIid")
+    Optional<Party> findByIdWithLock(@Param("id") Long partyId);
 
 }
