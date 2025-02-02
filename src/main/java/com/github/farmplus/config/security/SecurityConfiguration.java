@@ -11,6 +11,12 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -30,14 +36,34 @@ public class SecurityConfiguration {
                 .formLogin((fl)->fl.disable())
                 .rememberMe((rm)->rm.disable())
                 .sessionManagement(sm->sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(authz -> authz
-                        .anyRequest().permitAll() // 모든 요청 허용
+                .authorizeHttpRequests((requests) -> requests
+                                .requestMatchers(
+                                        "/resources/static/**",
+                                        "/auth/sign-up",
+                                        "/auth/login",
+                                        "/auth/email-check",
+                                        "/auth/nickname-check"
+                                ).permitAll()
+//  .anyRequest().authenticated() // 이 부분 활성화 시 모든 요청을 인증 필요하게 만듦
                 )
                 .exceptionHandling((exception) -> exception
                         .authenticationEntryPoint(new CustomerAuthenticationEntryPoint())
                         .accessDeniedHandler(new CustomerAccessDeniedHandler()))
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
         return http.build();
+    }
+    private CorsConfigurationSource corsConfig() {
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        corsConfiguration.setAllowCredentials(false);
+        corsConfiguration.setAllowedOrigins(List.of("*"));
+        corsConfiguration.addAllowedHeader("*");
+        corsConfiguration.addExposedHeader("token"); //추가
+        corsConfiguration.setExposedHeaders(Arrays.asList("Authorization", "Authorization-refresh", "token"));
+        corsConfiguration.setAllowedMethods(List.of("GET","PUT","POST","DELETE"));
+        corsConfiguration.setMaxAge(1000L*60*60);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**",corsConfiguration);
+        return source;
     }
 
     @Bean
