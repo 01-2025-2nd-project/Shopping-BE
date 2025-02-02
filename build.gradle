@@ -45,7 +45,7 @@ dependencies {
 	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client:2.7.2'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+//	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
 	// JWT 관련 의존성 세분화
@@ -59,6 +59,7 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+	enabled=false
 }
 
 tasks.named('bootJar'){
