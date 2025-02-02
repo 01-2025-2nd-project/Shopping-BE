@@ -38,4 +38,4 @@ security:
 
 gradle:
   java:
-    home: "/usr/lib/jvm/java-17-openjdk-amd64
+    home: "/usr/lib/jvm/java-17-openjdk-amd64"
