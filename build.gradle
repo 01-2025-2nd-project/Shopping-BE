@@ -35,6 +35,8 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	runtimeOnly 'com.h2database:h2'
+//	runtimeOnly 'mysql:mysql-connector-java:8.0.26'
+	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client:2.7.2'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -51,4 +53,8 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+tasks.named('bootJar'){
+	mainClass = 'com.github.farmplus.FarmPlusApplication'
 }
