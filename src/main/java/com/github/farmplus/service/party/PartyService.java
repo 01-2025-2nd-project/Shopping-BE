@@ -23,6 +23,7 @@ import com.github.farmplus.service.exceptions.NotFoundException;
 import com.github.farmplus.service.exceptions.StockShortageException;
 import com.github.farmplus.service.exceptions.UnauthorizedDeleteException;
 import com.github.farmplus.web.dto.base.ResponseDto;
+import com.github.farmplus.web.dto.count.TotalCount;
 import com.github.farmplus.web.dto.party.request.MakeParty;
 import com.github.farmplus.web.dto.party.response.MyParty;
 import com.github.farmplus.web.dto.party.response.PartyMember;
@@ -403,4 +404,9 @@ public class PartyService {
     }
 
 
+    public ResponseDto partyTotalCountResult() {
+        Integer partyTotalCount = partyRepository.findPartyTotalCount();
+        TotalCount totalCount = TotalCount.of(partyTotalCount);
+        return new ResponseDto(HttpStatus.OK.value(),"파티 총 개수 조회 성공" ,totalCount);
+    }
 }

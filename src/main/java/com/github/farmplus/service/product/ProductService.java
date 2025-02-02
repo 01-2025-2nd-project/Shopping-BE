@@ -14,6 +14,7 @@ import com.github.farmplus.repository.product_discount.ProductDiscountRepository
 import com.github.farmplus.repository.user.UserRepository;
 import com.github.farmplus.service.exceptions.NotFoundException;
 import com.github.farmplus.web.dto.base.ResponseDto;
+import com.github.farmplus.web.dto.count.TotalCount;
 import com.github.farmplus.web.dto.product.response.ProductDetail;
 import com.github.farmplus.web.dto.product.response.ProductMain;
 import com.github.farmplus.web.dto.product.response.ProductOption;
@@ -115,5 +116,11 @@ public class ProductService {
         List<ProductParty> productParties  = productParty.stream().map(ProductParty::of).toList();
 
         return new ResponseDto(HttpStatus.OK.value(),"조회 성공", productParties);
+    }
+
+    public ResponseDto productTotalCountResult() {
+        Integer productTotalCount = productRepository.findProductTotalCount();
+        TotalCount totalCount = TotalCount.of(productTotalCount);
+        return new ResponseDto(HttpStatus.OK.value(),"상품 총 개수 조회 성공" ,totalCount);
     }
 }

@@ -37,14 +37,7 @@ public class SecurityConfiguration {
                 .rememberMe((rm)->rm.disable())
                 .sessionManagement(sm->sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((requests) -> requests
-                                .requestMatchers(
-                                        "/resources/static/**",
-                                        "/auth/sign-up",
-                                        "/auth/login",
-                                        "/auth/email-check",
-                                        "/auth/nickname-check"
-                                ).permitAll()
-//  .anyRequest().authenticated() // 이 부분 활성화 시 모든 요청을 인증 필요하게 만듦
+                        .anyRequest().permitAll()  // 모든 요청에 대해 인증 없이 접근 허용
                 )
                 .exceptionHandling((exception) -> exception
                         .authenticationEntryPoint(new CustomerAuthenticationEntryPoint())
@@ -52,12 +45,13 @@ public class SecurityConfiguration {
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
-    private CorsConfigurationSource corsConfig() {
+    @Bean
+    public CorsConfigurationSource corsConfig() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowCredentials(false);
+        corsConfiguration.setAllowCredentials(true);
         corsConfiguration.setAllowedOrigins(List.of("*"));
         corsConfiguration.addAllowedHeader("*");
-        corsConfiguration.addExposedHeader("token"); //추가
+        corsConfiguration.addExposedHeader("Authorization"); //추가
         corsConfiguration.setExposedHeaders(Arrays.asList("Authorization", "Authorization-refresh", "token"));
         corsConfiguration.setAllowedMethods(List.of("GET","PUT","POST","DELETE"));
         corsConfiguration.setMaxAge(1000L*60*60);

@@ -48,4 +48,8 @@ public class PartyController {
                                        @PathVariable("partyId") Long partyId){
         return partyService.deleteJoinPartyResult(customUserDetails,partyId);
     }
+    @GetMapping("/total")
+    public ResponseDto partyTotalCount(){
+        return partyService.partyTotalCountResult();
+    }
 }
