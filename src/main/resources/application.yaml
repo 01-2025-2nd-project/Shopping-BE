@@ -3,8 +3,8 @@ server:
 
 spring:
   datasource:
-    username: root
-    password: 12341234
+    username: ${USERNAME}
+    password: ${PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/farm_plus?useUnicode=true&characterEncoding=UTF-8
   jpa:
@@ -17,7 +17,7 @@ spring:
       io.netty.resolver.dns: DEBUG
 
 jwt:
-  secret-key-source: "1r9c!Qz$6Q_7p%Lq8$kdD14b%vS5Xw*8"  # JWT 비밀키
+  secret-key-source: ${SECRETKEY}  # JWT 비밀키
 
 security:
   oauth2:
