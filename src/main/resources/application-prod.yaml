@@ -8,3 +8,8 @@ logging:
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
     url: jdbc:mariadb://database-1.cvo0mcig6l5w.ap-northeast-2.rds.amazonaws.com:3306/farm_plus?useUnicode=true&characterEncoding=UTF-8
+
+
+gradle:
+  java:
+    home: "/usr/lib/jvm/java-17-openjdk-amd64
