@@ -1,3 +1,5 @@
+import org.springframework.boot.gradle.tasks.bundling.BootJar
+
 plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.4.2'
@@ -62,6 +64,6 @@ tasks.named('test') {
 	enabled=false
 }
 
-tasks.named('bootJar'){
+tasks.named('bootJar', BootJar) {
 	mainClass = 'com.github.farmplus.FarmPlusApplication'
 }
