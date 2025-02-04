@@ -28,8 +28,10 @@ public class ProductController {
     public ResponseDto productParty(@PathVariable("productId") Long productId){
         return productService.productPartyResult(productId);
     }
+
     @GetMapping("/total")
-    public ResponseDto productTotalCount(){
-        return productService.productTotalCountResult();
+    public ResponseDto productTotalCountByCategory(@RequestParam(required = false, defaultValue = "all",value = "category") String category){
+        log.info(category);
+        return productService.productTotalCountByCategoryResult(category);
     }
 }

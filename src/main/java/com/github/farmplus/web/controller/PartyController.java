@@ -52,4 +52,8 @@ public class PartyController {
     public ResponseDto partyTotalCount(){
         return partyService.partyTotalCountResult();
     }
+    @GetMapping("/my-party")
+    public ResponseDto myPartyTotalCount(@AuthenticationPrincipal CustomUserDetails customUserDetails){
+        return partyService.myPartyTotalCountResult(customUserDetails);
+    }
 }

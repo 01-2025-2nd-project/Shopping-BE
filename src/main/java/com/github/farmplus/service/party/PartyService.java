@@ -100,10 +100,10 @@ public class PartyService {
         Discount discount = findDiscountById(discountId);
         ProductDiscount productDiscount = findProductDiscount(product,discount);
         // 등록하려는 파티의 모집인원 수와 구매개수를 곱한 값이 상품의 현재 수량보다 많다면 구매 불가
-        Long buyCapacity = (long) makeParty.getCapacity() * discount.getPeople();
+        Long buyCapacity = (long) makeParty.getPurchaseCount() * discount.getPeople();
         validateStockAvailability(product,buyCapacity);
         Double salePrice = product.getPrice() -( product.getPrice() * discount.getDiscountRate());
-        Double saleTotalPrice = salePrice * makeParty.getCapacity();
+        Double saleTotalPrice = salePrice * makeParty.getPurchaseCount();
         if ( saleTotalPrice > user.getMoney() ){
             throw new BadRequestException("현재 구매하려는 가격 : " +saleTotalPrice +" 현재 가지고 있는 돈 : " + user.getMoney() +"이므로 파티 등록이 불가능합니다.");
         }
@@ -136,11 +136,11 @@ public class PartyService {
             throw new BadRequestException("상품 변경은 불가능합니다.");
         }
         // 등록하려는 파티의 모집인원 수와 구매개수를 곱한 값이 상품의 현재 수량보다 많다면 구매 불가
-        Long buyCapacity = (long) makeParty.getCapacity() * discount.getPeople();
+        Long buyCapacity = (long) makeParty.getPurchaseCount() * discount.getPeople();
         validateStockAvailability(product,buyCapacity);
 
         Double salePrice = product.getPrice() -( product.getPrice() * discount.getDiscountRate());
-        final Double saleTotalPrice = salePrice * makeParty.getCapacity();
+        final Double saleTotalPrice = salePrice * makeParty.getPurchaseCount();
 
         List<PartyUserAmount> partyUsers = partyUserRepository.findPartyUserAmounts(party);
         log.info("partyUser : " + partyUsers);
@@ -407,6 +407,13 @@ public class PartyService {
     public ResponseDto partyTotalCountResult() {
         Integer partyTotalCount = partyRepository.findPartyTotalCount();
         TotalCount totalCount = TotalCount.of(partyTotalCount);
+        return new ResponseDto(HttpStatus.OK.value(),"파티 총 개수 조회 성공" ,totalCount);
+    }
+
+    public ResponseDto myPartyTotalCountResult(CustomUserDetails customUserDetails) {
+
+        Integer myPartyTotalCount = partyRepository.findMyPartyTotalCount(customUserDetails.getUserId());
+        TotalCount totalCount = TotalCount.of(myPartyTotalCount);
         return new ResponseDto(HttpStatus.OK.value(),"파티 총 개수 조회 성공" ,totalCount);
     }
 }

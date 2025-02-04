@@ -123,4 +123,15 @@ public class ProductService {
         TotalCount totalCount = TotalCount.of(productTotalCount);
         return new ResponseDto(HttpStatus.OK.value(),"상품 총 개수 조회 성공" ,totalCount);
     }
+
+    public ResponseDto productTotalCountByCategoryResult(String category) {
+        if (category.equals("all")){
+           return productTotalCountResult();
+        }else {
+            Integer productTotalCount = productRepository.findProductByCategoryTotalCount(category);
+            TotalCount totalCount = TotalCount.of(productTotalCount);
+            return new ResponseDto(HttpStatus.OK.value(),"상품 총 개수 조회 성공" ,totalCount);
+        }
+
+    }
 }

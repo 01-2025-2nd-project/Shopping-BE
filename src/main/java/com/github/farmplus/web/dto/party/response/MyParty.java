@@ -18,7 +18,7 @@ public class MyParty {
     private final Long partyId;
     private final String partyName;
     private final String productName;
-    private final Integer capacity;
+    private final Integer purchaseCount;
     private final Integer joinCount;
     private final String status;
     private final LocalDate endDate;
@@ -33,7 +33,7 @@ public class MyParty {
                 .partyId(party.getPartyId())
                 .partyName(party.getPartyName())
                 .productName(party.getProduct().getProductName())
-                .capacity(party.getCapacity())
+                .purchaseCount(party.getCapacity())
                 .joinCount(party.getPartyUserList().size())
                 .status(party.getStatus().toString())
                 .endDate(party.getEndDate())
