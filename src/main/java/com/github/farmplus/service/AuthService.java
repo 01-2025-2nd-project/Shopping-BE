@@ -64,6 +64,7 @@ public class AuthService {
                 .password(passwordEncoder.encode(password))  // 비밀번호 암호화
                 .phoneNumber(phoneNumber)
                 .address(address)
+                .money(0.0)
                 .build();
 
         userRepository.save(newUser);
