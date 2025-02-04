@@ -34,4 +34,11 @@ public class ProductController {
         log.info(category);
         return productService.productTotalCountByCategoryResult(category);
     }
+    @GetMapping("/search")
+    public ResponseDto searchProduct(@RequestParam(required = false,defaultValue = "",value = "keyword")String keyword,
+                                     @RequestParam(required = false,defaultValue = "0", value = "page" )Integer pageNum){
+        log.info("keyword : " + keyword);
+        log.info("paegeNum : " + pageNum);
+        return productService.searchProduct(keyword,pageNum);
+    }
 }

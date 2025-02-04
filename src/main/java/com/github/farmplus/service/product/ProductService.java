@@ -134,4 +134,11 @@ public class ProductService {
         }
 
     }
+
+    public ResponseDto searchProduct(String keyword, Integer pageNum) {
+        Pageable pageable = PageRequest.of(pageNum,10);
+        Page<ProductWithOrderAndParty> products = productRepository.findSearchProduct(keyword,pageable);
+        Page<ProductMain> productMains = products.map(ProductMain::of);
+        return new ResponseDto(HttpStatus.OK.value(),"검색 결과 조회 성공", productMains);
+    }
 }
