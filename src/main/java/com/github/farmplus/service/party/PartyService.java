@@ -104,10 +104,19 @@ public class PartyService {
         validateStockAvailability(product,buyCapacity);
         Double salePrice = product.getPrice() -( product.getPrice() * discount.getDiscountRate());
         Double saleTotalPrice = salePrice * makeParty.getPurchaseCount();
-        if ( saleTotalPrice > user.getMoney() ){
-            throw new BadRequestException("현재 구매하려는 가격 : " +saleTotalPrice +" 현재 가지고 있는 돈 : " + user.getMoney() +"이므로 파티 등록이 불가능합니다.");
+//        if ( saleTotalPrice > user.getMoney() ){
+//            throw new BadRequestException("현재 구매하려는 가격 : " +saleTotalPrice +" 현재 가지고 있는 돈 : " + user.getMoney() +"이므로 파티 등록이 불가능합니다.");
+//        }
+        //동시성이 발생하지 않게
+        //여러 개의 요청이 들어와도 UPDATE가 원자적으로 실행됨
+        //WHERE money >= amount 덕분에 잔액 부족 시 업데이트 방지됨
+        //user.updateMoney()처럼 엔티티를 가져와 변경하는 방식은 JPA의 변경 감지를 사용하므로,
+        //여러 요청이 동시에 들어오면 낙관적 락(Optimistic Lock) 충돌 가능성이 있음
+        //바로 UPDATE하는 방식이 더 빠르고 안정적
+        int updatedRows = userRepository.deductMoney(user.getUserId(), saleTotalPrice);
+        if (updatedRows == 0) {
+            throw new BadRequestException("잔액 부족 또는 동시성 문제 발생");
         }
-        user.updateMoney(user.getMoney() - saleTotalPrice);
         Party party = Party.of(product,productDiscount,makeParty);
         Party saveParty = partyRepository.save(party);
         PartyUser partyUser = PartyUser.host(user,saveParty,saleTotalPrice);
@@ -178,7 +187,10 @@ public class PartyService {
         //파티 참여 시 유저 머니 차감
         //파티 참여 시 마지막 파티원이면 자동으로 구매 유저 머니 차감
         //파티 참여시 동시성 고려
-        user.updateMoney(user.getMoney()-payment);
+        int updatedRows = userRepository.deductMoney(user.getUserId(), payment);
+        if (updatedRows == 0) {
+            throw new BadRequestException("잔액 부족 또는 동시성 문제 발생");
+        }
         PartyUser joinPartyUser = PartyUser.member(user,party,payment);
         partyUserRepository.save(joinPartyUser);
         if ( partyUsers.size() == (discount.getPeople() - 1) ){
@@ -220,7 +232,11 @@ public class PartyService {
         //해당 파티에서 PartyUser리스트에서 해당 유저 지우기
         partyUserRepository.deleteByUserAndParty(user,party);
         //원래 돈 복귀시키기
-        user.updateMoney(user.getMoney() + partyUsers.get(0).getPaymentAmount());
+        //동시성 고려
+        int updatedRows = userRepository.updateMoney(user.getUserId(),partyUsers.get(0).getPaymentAmount() );
+        if (updatedRows == 0) {
+            throw new BadRequestException("잔액 업데이트 실패");
+        }
         return new ResponseDto(HttpStatus.OK.value(),"파티 탈퇴가 되었습니다.");
 
 
@@ -237,6 +253,11 @@ public class PartyService {
 
             // User의 money 업데이트
             updateUser.updateMoney(updateUser.getMoney() + userMoney);
+
+            int updatedRows = userRepository.updateMoney(updateUser.getUserId(), userMoney);
+            if (updatedRows == 0) {
+                throw new BadRequestException("잔액 업데이트 실패");
+            }
 
             // PartyUser의 paymentAmount 업데이트
             partyUser.updatePaymentAmount(saleTotalPrice);
