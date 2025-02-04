@@ -36,6 +36,7 @@ public class SecurityConfiguration {
                 .formLogin((fl)->fl.disable())
                 .rememberMe((rm)->rm.disable())
                 .sessionManagement(sm->sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .cors(c-> c.configurationSource(corsConfig()))
                 .authorizeHttpRequests((requests) -> requests
                         .anyRequest().permitAll()  // 모든 요청에 대해 인증 없이 접근 허용
                 )
@@ -45,8 +46,8 @@ public class SecurityConfiguration {
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
-    @Bean
-    public CorsConfigurationSource corsConfig() {
+
+    private CorsConfigurationSource corsConfig() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowCredentials(false);
         corsConfiguration.setAllowedOrigins(List.of("*"));
