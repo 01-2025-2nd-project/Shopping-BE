@@ -19,7 +19,7 @@ import java.util.List;
 public class NotificationController {
     private final NotificationService notificationService;
     @PutMapping("/read")
-    public ResponseDto markNotificationsAsRead(@RequestParam("notification") List<Long> notificationIds) {
+    public ResponseDto markNotificationsAsRead(@RequestParam("notification-id") List<Long> notificationIds) {
         return notificationService.readNotificationsResult(notificationIds);
     }
     @GetMapping("/notifications")
