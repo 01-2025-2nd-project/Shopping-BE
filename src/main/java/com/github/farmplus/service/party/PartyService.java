@@ -1,7 +1,10 @@
 package com.github.farmplus.service.party;
 
+import com.github.farmplus.config.socket.NotificationWebSocketHandler;
 import com.github.farmplus.repository.discount.Discount;
 import com.github.farmplus.repository.discount.DiscountRateRepository;
+import com.github.farmplus.repository.notification.Notification;
+import com.github.farmplus.repository.notification.NotificationRepository;
 import com.github.farmplus.repository.order.Order;
 import com.github.farmplus.repository.order.OrderRepository;
 import com.github.farmplus.repository.party.Party;
@@ -24,6 +27,7 @@ import com.github.farmplus.service.exceptions.StockShortageException;
 import com.github.farmplus.service.exceptions.UnauthorizedDeleteException;
 import com.github.farmplus.web.dto.base.ResponseDto;
 import com.github.farmplus.web.dto.count.TotalCount;
+import com.github.farmplus.web.dto.notification.NotificationDto;
 import com.github.farmplus.web.dto.party.request.MakeParty;
 import com.github.farmplus.web.dto.party.response.MyParty;
 import com.github.farmplus.web.dto.party.response.PartyMember;
@@ -35,6 +39,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,6 +58,9 @@ public class PartyService {
     private final DiscountRateRepository discountRateRepository;
     private final ProductDiscountRepository productDiscountRepository;
     private final OrderRepository orderRepository;
+    private final NotificationWebSocketHandler notificationWebSocketHandler;
+    private final NotificationRepository notificationRepository;
+    private final SimpMessagingTemplate messagingTemplate;
     public ResponseDto getMyPartyResult(CustomUserDetails customUserDetails, Integer pageNum) {
 
         User user = tokenUser(customUserDetails);
@@ -204,11 +212,22 @@ public class PartyService {
 
             party.updatePartyStatus(PartyStatus.COMPLETED);
             orderRepository.saveAll(orders);
+            // 알림 생성 및 전송
+            sendNotifications(party, updatePartyUserList);
+
             return new ResponseDto(HttpStatus.CREATED.value(),"파티 마지막 참여자이므로 결제 완료되었습니다..");
         }
 
 
         return new ResponseDto(HttpStatus.CREATED.value(),"파티 참여에 성공했습니다.");
+    }
+    // 알림 생성 후 WebSocket으로 전송
+    private void sendNotifications(Party party, List<PartyUser> partyUsers) {
+        partyUsers.stream()
+                .map(Notification::from)  // PartyUser를 Notification으로 변환
+                .peek(notificationRepository::save) // 알림 저장
+                .map(NotificationDto::from)  // Notification을 NotificationDto로 변환
+                .forEach(notificationDto -> messagingTemplate.convertAndSend("/topic/notifications/" + notificationDto.getUserId(), notificationDto));
     }
     @Transactional
     public ResponseDto deleteJoinPartyResult(CustomUserDetails customUserDetails, Long partyId) {
