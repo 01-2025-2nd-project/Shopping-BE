@@ -54,7 +54,7 @@ public class SecurityConfiguration {
         corsConfiguration.addAllowedHeader("*");
         corsConfiguration.addExposedHeader("Authorization"); //추가
         corsConfiguration.setExposedHeaders(Arrays.asList("Authorization", "Authorization-refresh", "token"));
-        corsConfiguration.setAllowedMethods(List.of("GET","PUT","POST","DELETE"));
+        corsConfiguration.setAllowedMethods(List.of("GET","PUT","POST","DELETE","OPTIONS"));
         corsConfiguration.setMaxAge(1000L*60*60);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**",corsConfiguration);

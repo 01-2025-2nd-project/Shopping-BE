@@ -227,7 +227,7 @@ public class PartyService {
                 .map(Notification::from)  // PartyUser를 Notification으로 변환
                 .peek(notificationRepository::save) // 알림 저장
                 .map(NotificationDto::from)  // Notification을 NotificationDto로 변환
-                .forEach(notificationDto -> messagingTemplate.convertAndSend("/topic/notifications/" + notificationDto.getUserId(), notificationDto));
+                .forEach(notificationDto -> messagingTemplate.convertAndSend("/topic/notifications/" + notificationDto.getEmail(), notificationDto));
     }
     @Transactional
     public ResponseDto deleteJoinPartyResult(CustomUserDetails customUserDetails, Long partyId) {

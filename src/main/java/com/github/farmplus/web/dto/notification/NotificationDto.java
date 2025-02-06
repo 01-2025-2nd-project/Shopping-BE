@@ -14,6 +14,7 @@ public class NotificationDto {
     private String content;
     private Long partyId;
     private Boolean isRead;
+    private String email;
     public static NotificationDto from(Notification notification){
         return NotificationDto.builder()
                 .notificationId(notification.getNotificationId())
@@ -21,6 +22,7 @@ public class NotificationDto {
                 .content(notification.getContent())
                 .partyId(notification.getParty().getPartyId())
                 .isRead(notification.getIsRead())
+                .email(notification.getUser().getEmail())
                 .build();
 
     }
