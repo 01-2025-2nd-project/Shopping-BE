@@ -98,4 +98,13 @@ public class AuthService {
             throw new NotAcceptException("로그인 할 수 없습니다.");
         }
     }
+
+    public boolean isNicknameExist(String nickname) {
+        return userRepository.existsByNickname(nickname);
+
+    }
+
+    public boolean isEmailExist(String email) {
+        return userRepository.existsByEmail(email);
+    }
 }
