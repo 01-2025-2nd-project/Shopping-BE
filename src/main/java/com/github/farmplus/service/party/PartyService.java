@@ -1,6 +1,5 @@
 package com.github.farmplus.service.party;
 
-import com.github.farmplus.config.socket.NotificationWebSocketHandler;
 import com.github.farmplus.repository.discount.Discount;
 import com.github.farmplus.repository.discount.DiscountRateRepository;
 import com.github.farmplus.repository.notification.Notification;
@@ -30,8 +29,6 @@ import com.github.farmplus.web.dto.count.TotalCount;
 import com.github.farmplus.web.dto.notification.NotificationDto;
 import com.github.farmplus.web.dto.party.request.MakeParty;
 import com.github.farmplus.web.dto.party.response.MyParty;
-import com.github.farmplus.web.dto.party.response.PartyMember;
-import com.github.farmplus.web.dto.party.response.PartyMemberName;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -43,7 +40,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -58,7 +54,6 @@ public class PartyService {
     private final DiscountRateRepository discountRateRepository;
     private final ProductDiscountRepository productDiscountRepository;
     private final OrderRepository orderRepository;
-    private final NotificationWebSocketHandler notificationWebSocketHandler;
     private final NotificationRepository notificationRepository;
     private final SimpMessagingTemplate messagingTemplate;
     public ResponseDto getMyPartyResult(CustomUserDetails customUserDetails, Integer pageNum) {

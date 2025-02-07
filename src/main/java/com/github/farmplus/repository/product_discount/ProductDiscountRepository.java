@@ -17,4 +17,5 @@ public interface ProductDiscountRepository extends JpaRepository<ProductDiscount
     List<ProductDiscount> findAllByProductWithDiscount(Product product);
 
     Optional<ProductDiscount> findByProductAndDiscount(Product product, Discount discount);
+
 }
