@@ -40,8 +40,8 @@ public class OrderController {
 
 
     @GetMapping("/total-count")
-    public ResponseDto getTotalOrderCount() {
-        TotalCount totalCount = orderService.getTotalOrderCount();  // 수정된 메서드 사용
+    public ResponseDto getTotalOrderCount(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        TotalCount totalCount = orderService.getTotalOrderCount(customUserDetails);  // 수정된 메서드 사용
         return new ResponseDto(HttpStatus.OK.value(), "전체 주문 총 개수 조회", totalCount);
     }
 }

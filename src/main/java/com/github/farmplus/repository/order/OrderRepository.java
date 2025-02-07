@@ -11,8 +11,8 @@ import java.util.List;
 @Repository
 public interface OrderRepository extends JpaRepository<Order,Integer> {
     List<Order> findAllByParty(Party party);
-    @Query("SELECT COUNT(o) FROM Order o")
-    Integer findTotalOrders();
+    @Query("SELECT COUNT(o) FROM Order o WHERE o.user = :user")
+    Integer findTotalOrders(User user);
     List<Order> findAllByUser(User user);
 
 }

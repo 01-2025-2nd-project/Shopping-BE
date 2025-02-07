@@ -67,8 +67,9 @@ public class OrderService {
     }
 
     // 완료된 주문의 총 개수 조회 메서드
-    public TotalCount getTotalOrderCount() {
-        Integer totalCount = orderRepository.findTotalOrders();  // 전체 주문 개수를 구함
+    public TotalCount getTotalOrderCount(CustomUserDetails customUserDetails) {
+        User user = userRepository.findById(customUserDetails.getUserId()).orElse(null);
+        Integer totalCount = orderRepository.findTotalOrders(user);
         return TotalCount.of(totalCount != null ? totalCount : 0);
     }
 
