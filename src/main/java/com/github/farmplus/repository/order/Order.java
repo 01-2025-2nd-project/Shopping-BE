@@ -37,6 +37,7 @@ public class Order extends BaseEntity {
     private Long price;
     @Column(name = "final_price", nullable = false)
     private Double finalPrice;
+    @Enumerated(EnumType.STRING)
 
     public static Order of(PartyUser partyUser){
         return Order.builder()
@@ -55,3 +56,4 @@ public class Order extends BaseEntity {
 
 
 }
+

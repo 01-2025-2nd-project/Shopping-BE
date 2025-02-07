@@ -1,5 +1,6 @@
 package com.github.farmplus.config.security;
 
+import com.github.farmplus.repository.userDetails.CustomUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
@@ -85,9 +87,15 @@ public class JwtTokenProvider {
 
     public Authentication getAuthentication(String jwtToken) {
         String email = getUserEmail(jwtToken);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+        CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(email); // CustomUserDetails로 캐스팅
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+
+        // Authentication 객체를 SecurityContext에 명시적으로 저장
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        return authentication;
     }
+
 
     private String getUserEmail(String jwtToken) {
         return Jwts.parserBuilder()
