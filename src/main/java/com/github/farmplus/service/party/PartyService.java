@@ -62,14 +62,11 @@ public class PartyService {
         log.info("user : " + user);
         Pageable pageable = PageRequest.of(pageNum,10);
 
-        List<PartyUser> partyUserPage = partyUserRepository.findAllByUser(user);
+        Page<PartyUser> partyUserPage = partyUserRepository.findAllByUser(user,pageable);
 
-        List<MyParty> myParties =  partyUserPage.stream().map(MyParty::of).collect(Collectors.toList());
-        int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), myParties.size());
-        List<MyParty> pageContent = myParties.subList(start, end);
-        Page<MyParty> parties = new PageImpl<>(pageContent, pageable, myParties.size());
-        return new ResponseDto(HttpStatus.OK.value(),"조회 성공",parties);
+        Page<MyParty> myParties =  partyUserPage.map(MyParty::of);
+
+        return new ResponseDto(HttpStatus.OK.value(),"조회 성공",myParties);
 
     }
     @Transactional

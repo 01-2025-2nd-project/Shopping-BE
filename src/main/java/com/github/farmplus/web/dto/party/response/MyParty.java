@@ -19,6 +19,7 @@ public class MyParty {
     private final String partyName;
     private final String productName;
     private final Integer purchaseCount;
+    private final Long optionId;
     private final Integer joinCount;
     private final String status;
     private final LocalDate endDate;

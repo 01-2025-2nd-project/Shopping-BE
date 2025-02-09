@@ -16,13 +16,14 @@ import java.util.Optional;
 @Repository
 public interface PartyUserRepository extends JpaRepository<PartyUser,Long> {
     List<PartyUser> findAllByParty(Party party);
-    @Query("SELECT DISTINCT pu FROM PartyUser pu " +
-            "JOIN FETCH pu.party p " +
-            "JOIN FETCH p.product " +
-            "JOIN FETCH pu.user " +
-            "LEFT JOIN FETCH p.partyUserList " +
-            "WHERE pu.user = :user")
-    List<PartyUser> findAllByUser(User user);
+//    @Query("SELECT DISTINCT pu FROM PartyUser pu " +
+//            "JOIN FETCH pu.party p " +
+//            "JOIN FETCH p.product " +
+//            "JOIN FETCH pu.user " +
+//            "LEFT JOIN FETCH p.partyUserList " +
+//            "WHERE pu.user = :user")
+//    List<PartyUser> findAllByUser(User user);
+    Page<PartyUser> findAllByUser(User user,Pageable pageable);
 
     @Query("SELECT new com.github.farmplus.repository.partyUser.PartyUserAmount(pu.user.userId, pu.paymentAmount, pu.user.money, pu.paymentAmount + pu.user.money) " +
             "FROM PartyUser pu WHERE pu.party = :party")

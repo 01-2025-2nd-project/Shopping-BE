@@ -60,6 +60,7 @@ public class OrderService {
     // 주문 목록 조회 메서드
     public List<Order> getOrderList(Integer userId, Integer pageNum) {
         User user = userRepository.findById(userId).orElse(null);
+
         if (user == null) {
             return List.of(); // 사용자 정보가 없으면 빈 리스트 반환
         }

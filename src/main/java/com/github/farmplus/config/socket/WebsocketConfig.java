@@ -18,7 +18,8 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
                         "https://frontend-ecru-phi-22.vercel.app",  // 배포된 프론트엔드 URL
                         "http://localhost:3000",                    // 로컬 환경에서 실행되는 프론트엔드 URL (예: React 앱)
                         "https://*.ngrok.io",                       // ngrok URL 패턴 (동적 URL 허용)
-                        "https://jiangxy.github.io"                 // WebSocket 테스트 툴의 출처 추가
+                        "https://jiangxy.github.io" ,
+                        "http://localhost:8080"// WebSocket 테스트 툴의 출처 추가
                 );
     }
 
