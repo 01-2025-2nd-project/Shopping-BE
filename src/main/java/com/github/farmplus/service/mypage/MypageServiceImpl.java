@@ -29,7 +29,7 @@ public class MypageServiceImpl implements MypageService {
         profile.setEmail(user.getEmail());
         profile.setPhoneNumber(user.getPhoneNumber());
         profile.setAddress(user.getAddress());
-        profile.setPoint(0); // 포인트 계산 로직 추가 필요
+        profile.setPoint(user.getMoney());
         return profile;
     }
 
