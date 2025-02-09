@@ -35,7 +35,7 @@ public class OrderController {
     public ResponseDto getOrderList(@AuthenticationPrincipal CustomUserDetails customUserDetails,
                                     @RequestParam(defaultValue = "0", value = "page") Integer pageNum) {
         return new ResponseDto(HttpStatus.OK.value(), "구매 목록 조회 성공",
-                orderService.getOrderList(customUserDetails.getUserId(), pageNum));
+                orderService.getOrderList(customUserDetails, pageNum));
     }
 
 

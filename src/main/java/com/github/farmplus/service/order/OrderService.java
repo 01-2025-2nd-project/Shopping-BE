@@ -11,10 +11,18 @@ import com.github.farmplus.repository.user.UserRepository;
 import com.github.farmplus.repository.userDetails.CustomUserDetails;
 import com.github.farmplus.web.dto.count.TotalCount;
 import com.github.farmplus.web.dto.order.request.OrderRequest;
+import com.github.farmplus.web.dto.order.response.MyOrder;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -58,14 +66,16 @@ public class OrderService {
     }
 
     // 주문 목록 조회 메서드
-    public List<Order> getOrderList(Integer userId, Integer pageNum) {
-        User user = userRepository.findById(userId).orElse(null);
+    public Page<MyOrder> getOrderList(CustomUserDetails customUserDetails, Integer pageNum) {
+        User user = userRepository.findById(customUserDetails.getUserId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        if (user == null) {
-            return List.of(); // 사용자 정보가 없으면 빈 리스트 반환
-        }
-        return orderRepository.findAllByUser(user); // 페이지네이션 로직 추가 필요
+        Pageable pageable = PageRequest.of(pageNum, 10); // 한 페이지에 10개씩 표시
+        Page<Order> orders = orderRepository.findAllByUser(user, pageable);
+
+        return orders.map(MyOrder::from);
     }
+
 
     // 완료된 주문의 총 개수 조회 메서드
     public TotalCount getTotalOrderCount(CustomUserDetails customUserDetails) {

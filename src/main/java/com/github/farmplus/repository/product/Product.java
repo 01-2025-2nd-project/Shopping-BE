@@ -55,4 +55,5 @@ public class Product extends BaseEntity {
         this.stock =stock;
     }
 
+
 }

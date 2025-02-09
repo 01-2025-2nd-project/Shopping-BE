@@ -11,6 +11,6 @@ public class ProfileResponse {
     private String email;
     private String phoneNumber;
     private String address;
-    private int point;
+    private Double point;
 }
 
