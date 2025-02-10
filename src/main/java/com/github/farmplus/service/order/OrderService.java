@@ -9,6 +9,7 @@ import com.github.farmplus.repository.party.PartyRepository;
 import com.github.farmplus.repository.user.User;
 import com.github.farmplus.repository.user.UserRepository;
 import com.github.farmplus.repository.userDetails.CustomUserDetails;
+import com.github.farmplus.service.exceptions.BadRequestException;
 import com.github.farmplus.web.dto.count.TotalCount;
 import com.github.farmplus.web.dto.order.request.OrderRequest;
 import com.github.farmplus.web.dto.order.response.MyOrder;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import org.springframework.data.domain.Pageable;
@@ -32,6 +34,7 @@ public class OrderService {
     private final PartyRepository partyRepository;
     private final UserRepository userRepository; // 추가
 
+    @Transactional //자동저장
     public boolean processOrder(CustomUserDetails customUserDetails, Long productId, OrderRequest orderRequest) {
         // 사용자 정보 가져오기
         User user = userRepository.findById(customUserDetails.getUserId()).orElse(null);
@@ -39,26 +42,27 @@ public class OrderService {
             return false; // 사용자 정보가 없으면 처리 실패
         }
 
+
         // 상품 정보 가져오기
         Product product = productRepository.findById(productId).orElse(null);
         if (product == null) {
             return false;
         }
 
-        // 사용 가능한 파티 찾기
-        Party party = findAvailableParty(product);
-        if (party == null) {
-            return false;
+        // 상품 수량 확인하기
+        if (product.getStock() < orderRequest.getQuantity()) {
+            throw new BadRequestException("구매 가능 수량이 부족합니다.");
         }
+        product.updateStock(product.getStock() - orderRequest.getQuantity());
 
         // 주문 생성
         Order order = Order.builder()
                 .user(user)
                 .product(product)
-                .party(party)
+                .party(null)
                 .quantity(orderRequest.getQuantity())
                 .price(product.getPrice() * orderRequest.getQuantity())
-                .finalPrice(orderRequest.getFinalPrice())
+                .finalPrice((double) (product.getPrice() * orderRequest.getQuantity()))
                 .build();
 
         orderRepository.save(order);
@@ -84,9 +88,4 @@ public class OrderService {
         return TotalCount.of(totalCount != null ? totalCount : 0);
     }
 
-    // 사용 가능한 파티를 찾는 로직 (유지)
-    private Party findAvailableParty(Product product) {
-        List<Party> parties = partyRepository.findAllByProduct(product);
-        return parties.isEmpty() ? null : parties.get(0);
-    }
 }

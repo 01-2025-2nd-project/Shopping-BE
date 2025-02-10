@@ -29,7 +29,7 @@ public class Order extends BaseEntity {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "party_id", nullable = false)
+    @JoinColumn(name = "party_id")
     private Party party;
     @Column(name = "quantity", nullable = false)
     private Integer quantity;

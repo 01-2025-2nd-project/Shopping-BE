@@ -2,7 +2,9 @@ package com.github.farmplus.web.controller;
 
 import com.github.farmplus.repository.userDetails.CustomUserDetails;
 import com.github.farmplus.service.AuthService;
+import com.github.farmplus.web.dto.auth.EmailCheck;
 import com.github.farmplus.web.dto.auth.Login;
+import com.github.farmplus.web.dto.auth.NicknameCheck;
 import com.github.farmplus.web.dto.auth.SignUp;
 import com.github.farmplus.web.dto.base.ResponseDto;
 import jakarta.servlet.http.HttpServletResponse;
@@ -39,8 +41,8 @@ public class SignController {
     }
 
     @PostMapping("/nickname")
-    public ResponseDto checkNickname(@RequestBody String nickname) {
-        boolean isExist = authService.isNicknameExist(nickname);
+    public ResponseDto checkNickname(@RequestBody NicknameCheck nicknameCheck) {
+        boolean isExist = authService.isNicknameExist(nicknameCheck.getNickname());
 
         if (isExist) {
             return new ResponseDto(HttpStatus.BAD_REQUEST.value(), "닉네임이 이미 존재합니다.");
@@ -50,8 +52,8 @@ public class SignController {
     }
 
     @PostMapping("/email")
-    public ResponseDto checkEmail(@RequestBody String email) {
-        boolean isExist = authService.isEmailExist(email);
+    public ResponseDto checkEmail(@RequestBody EmailCheck emailCheck) {
+        boolean isExist = authService.isEmailExist(emailCheck.getEmail());
 
         if (isExist) {
             return new ResponseDto(HttpStatus.BAD_REQUEST.value(), "이메일이 이미 존재합니다.");
