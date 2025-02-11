@@ -39,41 +39,28 @@ public class AuthService {
 
     @Transactional
     public boolean signUp(SignUp signUpRequest) {
-        String name = signUpRequest.getName();
-        String nickname = signUpRequest.getNickname();
-        String email = signUpRequest.getEmail();
-        String password = signUpRequest.getPassword();
-        String phoneNumber = signUpRequest.getPhoneNumber();
-        String address = signUpRequest.getAddress();
 
         // 이메일 중복 확인
-        if (userRepository.existsByEmail(email)) {
+        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
             throw new BadRequestException("이미 존재하는 이메일입니다.");
         }
 
         // 닉네임 중복 확인
-        if (userRepository.existsByNickname(nickname)) {
+        if (userRepository.existsByNickname(signUpRequest.getNickname())) {
             throw new BadRequestException("이미 존재하는 닉네임입니다.");
         }
 
         // 새로운 사용자 저장
-        User newUser = User.builder()
-                .name(name)
-                .nickname(nickname)
-                .email(email)
-                .password(passwordEncoder.encode(password))  // 비밀번호 암호화
-                .phoneNumber(phoneNumber)
-                .address(address)
-                .money(0.0)
-                .build();
-
+        User newUser = User.from(signUpRequest);
+        String password = passwordEncoder.encode(signUpRequest.getPassword());
+        newUser.passwordSave(password);
         userRepository.save(newUser);
 
         // 사용자 역할 설정
         Role role = roleRepository.findByRoleName("ROLE_USER")
                 .orElseThrow(() -> new NotFoundException("ROLE_USER를 찾을 수가 없습니다."));
 
-        userRoleRepository.save(UserRole.builder().role(role).user(newUser).build());
+        userRoleRepository.save(UserRole.of(role, newUser));
 
         return true;
     }

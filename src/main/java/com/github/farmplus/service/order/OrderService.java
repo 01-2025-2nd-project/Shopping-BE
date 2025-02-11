@@ -10,6 +10,7 @@ import com.github.farmplus.repository.user.User;
 import com.github.farmplus.repository.user.UserRepository;
 import com.github.farmplus.repository.userDetails.CustomUserDetails;
 import com.github.farmplus.service.exceptions.BadRequestException;
+import com.github.farmplus.service.exceptions.NotFoundException;
 import com.github.farmplus.web.dto.count.TotalCount;
 import com.github.farmplus.web.dto.order.request.OrderRequest;
 import com.github.farmplus.web.dto.order.response.MyOrder;
@@ -34,20 +35,15 @@ public class OrderService {
     private final PartyRepository partyRepository;
     private final UserRepository userRepository; // 추가
 
-    @Transactional //자동저장
+    @Transactional //자동저장 (중간 에러 발생시 원위치)
     public boolean processOrder(CustomUserDetails customUserDetails, Long productId, OrderRequest orderRequest) {
         // 사용자 정보 가져오기
-        User user = userRepository.findById(customUserDetails.getUserId()).orElse(null);
-        if (user == null) {
-            return false; // 사용자 정보가 없으면 처리 실패
-        }
-
+        User user = userRepository.findById(customUserDetails.getUserId())
+                .orElseThrow(() -> new NotFoundException(customUserDetails.getUserId() + "에 해당하는 사용자를 찾을 수 없습니다."));
 
         // 상품 정보 가져오기
-        Product product = productRepository.findById(productId).orElse(null);
-        if (product == null) {
-            return false;
-        }
+        Product product = productRepository.findByIdWithLock(productId) // 동시성 비관적 lock으로 해결
+                .orElseThrow(() -> new NotFoundException(productId + "에 해당하는 상품을 찾을 수 없습니다."));
 
         // 상품 수량 확인하기
         if (product.getStock() < orderRequest.getQuantity()) {
@@ -56,16 +52,12 @@ public class OrderService {
         product.updateStock(product.getStock() - orderRequest.getQuantity());
 
         // 주문 생성
-        Order order = Order.builder()
-                .user(user)
-                .product(product)
-                .party(null)
-                .quantity(orderRequest.getQuantity())
-                .price(product.getPrice() * orderRequest.getQuantity())
-                .finalPrice((double) (product.getPrice() * orderRequest.getQuantity()))
-                .build();
-
+        Order order = Order.of(user, product, orderRequest);
         orderRepository.save(order);
+        int orderResult = userRepository.deductMoney(user.getUserId(), (double) (orderRequest.getQuantity()*product.getPrice()));
+        if (orderResult == 0) {
+            throw new BadRequestException("돈이 부족하거나 동시성 문제가 발생하였습니다.");
+        }
         return true;
     }
 
@@ -83,7 +75,8 @@ public class OrderService {
 
     // 완료된 주문의 총 개수 조회 메서드
     public TotalCount getTotalOrderCount(CustomUserDetails customUserDetails) {
-        User user = userRepository.findById(customUserDetails.getUserId()).orElse(null);
+        User user = userRepository.findById(customUserDetails.getUserId())
+                .orElseThrow(() -> new NotFoundException(customUserDetails.getUserId() + "에 해당하는 사용자를 찾을 수 없습니다."));
         Integer totalCount = orderRepository.findTotalOrders(user);
         return TotalCount.of(totalCount != null ? totalCount : 0);
     }

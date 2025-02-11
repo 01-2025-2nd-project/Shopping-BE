@@ -16,8 +16,8 @@ public interface UserRepository extends JpaRepository<User,Integer> {
     Optional<User> findByName(String name);
     boolean existsByEmail (String email); // 이메일로 사용자 찾기
     boolean existsByNickname (String nickname); // 닉네임으로 사용자 찾기
-    @Modifying
-    @Query("UPDATE User u SET u.money = u.money - :amount WHERE u.userId = :userId AND u.money >= :amount")
+    @Modifying //변경 필요할때 (UPDATE문)
+    @Query("UPDATE User u SET u.money = u.money - :amount WHERE u.userId = :userId AND u.money >= :amount") //쿼리문에 직접 update를 넣어주면 db에서 하나씩 처리 (동시성 고려)
     int deductMoney(@Param("userId") Integer userId, @Param("amount") Double amount);
 
     @Modifying

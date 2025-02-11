@@ -3,6 +3,8 @@ package com.github.farmplus.repository.user;
 import com.github.farmplus.repository.base.BaseEntity;
 import com.github.farmplus.repository.role.Role;
 import com.github.farmplus.repository.userRole.UserRole;
+import com.github.farmplus.web.dto.auth.SignUp;
+import com.github.farmplus.web.dto.mypage.ProfileUpdateRequest;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-@Setter
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
@@ -52,4 +53,29 @@ public class User extends BaseEntity {
     public void updateMoney(Double money){
         this.money = money;
     }
+
+    public static User from(SignUp signupRequest) {
+        return User.builder()
+                .name(signupRequest.getName())
+                .nickname(signupRequest.getNickname())
+                .email(signupRequest.getEmail())
+                .phoneNumber(signupRequest.getPhoneNumber())
+                .address(signupRequest.getAddress())
+                .money(0.0)
+                .build();
+    }
+
+    public void passwordSave(String password) {
+        this.password = password;
+    }
+
+
+    public void updateUser(ProfileUpdateRequest profileUpdateRequest) {
+        this.nickname = profileUpdateRequest.getNickname();
+        this.phoneNumber = profileUpdateRequest.getPhoneNumber();
+        this.address = profileUpdateRequest.getAddress();
+    }
+
+
+
 }

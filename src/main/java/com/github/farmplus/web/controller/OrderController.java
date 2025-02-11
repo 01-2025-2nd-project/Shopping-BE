@@ -38,7 +38,6 @@ public class OrderController {
                 orderService.getOrderList(customUserDetails, pageNum));
     }
 
-
     @GetMapping("/total-count")
     public ResponseDto getTotalOrderCount(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
         TotalCount totalCount = orderService.getTotalOrderCount(customUserDetails);  // 수정된 메서드 사용

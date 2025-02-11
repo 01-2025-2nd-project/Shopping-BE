@@ -24,5 +24,11 @@ public class UserRole{
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
+    public static UserRole of(Role role, User newUser){
+        return UserRole.builder()
+                .role(role)
+                .user(newUser).build();
+    }
+
 
 }

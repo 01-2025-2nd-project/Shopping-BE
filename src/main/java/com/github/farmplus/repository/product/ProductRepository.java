@@ -92,6 +92,7 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
             "GROUP BY p " +
             "ORDER BY p.price ASC")
     Page<ProductWithOrderAndParty> findAllByCategoryOrderByPriceAsc(Category category,Pageable pageable);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT p FROM Product p WHERE p.productId = :id")
     Optional<Product> findByIdWithLock(@Param("id") Long id);
