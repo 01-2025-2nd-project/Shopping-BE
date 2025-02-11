@@ -31,6 +31,7 @@ import com.github.farmplus.web.dto.party.request.MakeParty;
 import com.github.farmplus.web.dto.party.response.MyParty;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -69,6 +70,7 @@ public class PartyService {
         return new ResponseDto(HttpStatus.OK.value(),"조회 성공",myParties);
 
     }
+
     @Transactional
     public ResponseDto deletePartyResult(CustomUserDetails customUserDetails, Long partyId) {
         //토큰으로 유저 찾기
@@ -87,6 +89,7 @@ public class PartyService {
         // 1) 완료 실패인 경우 : 파티 삭제 시 order부분에 partyId null(완료인 경우만)로 지정, PartyUser리스트 지우기, Party지우기
         // 2) 진행 중인 경우 : 파티 삭제 시 유저에게 money 다시, PartyUser리스트 지우기, Party지우기
         deletePartyUpdateByPartyStatus(party);
+
         return new ResponseDto(HttpStatus.OK.value(),"파티가 삭제되었습니다.");
     }
     @Transactional
@@ -170,6 +173,7 @@ public class PartyService {
 
     }
     @Transactional
+    @CacheEvict(value = "notificationList", key = "#customUserDetails.userId")
     public ResponseDto joinPartyResult(CustomUserDetails customUserDetails, Long partyId) {
         User user =tokenUser(customUserDetails);
         Party party = partyRepository.findByIdWithLock(partyId)
@@ -214,6 +218,7 @@ public class PartyService {
         return new ResponseDto(HttpStatus.CREATED.value(),"파티 참여에 성공했습니다.");
     }
     // 알림 생성 후 WebSocket으로 전송
+
     private void sendNotifications(Party party, List<PartyUser> partyUsers) {
         partyUsers.stream()
                 .map(Notification::from)  // PartyUser를 Notification으로 변환

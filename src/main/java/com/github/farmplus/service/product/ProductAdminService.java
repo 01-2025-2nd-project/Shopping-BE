@@ -15,6 +15,8 @@ import com.github.farmplus.web.dto.product.response.CategoryResponse;
 import com.github.farmplus.web.dto.product.request.ProductRegister;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,7 @@ public class ProductAdminService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+    @Cacheable(value = "categoryList", key = "#root.methodName")
     public ResponseDto getCategoryResult() {
        List<Category> categories =categoryRepository.findAll();
        if (categories.isEmpty()){
@@ -39,6 +42,8 @@ public class ProductAdminService {
        return new ResponseDto(HttpStatus.OK.value(),"카테고리 리스트 조회 성공",categoryResponses);
     }
 
+
+    @CacheEvict(value = "productTotalCount", allEntries = true)
     public ResponseDto productRegisterResult(CustomUserDetails customUserDetails, ProductRegister productRegister) {
         //유저 찾기 메소드로 유저 찾기
         User tokenUser = findUserByEmail(customUserDetails);
@@ -56,6 +61,7 @@ public class ProductAdminService {
     }
 
 
+    @CacheEvict(value = "productDetail", key = "#productId")
     @Transactional
     public ResponseDto productUpdateResult(CustomUserDetails customUserDetails, ProductRegister productRegister, Long productId) {
         User tokenUser = findUserByEmail(customUserDetails);
@@ -70,6 +76,7 @@ public class ProductAdminService {
         product.updateFromRegister(productRegister,category);
         return new ResponseDto(HttpStatus.OK.value(), productId+"에 해당하는 상품이 업데이트 완료되었습니다.");
     }
+    @CacheEvict(value = "productDetail", key = "#productId")
     public ResponseDto productDeleteResult(CustomUserDetails customUserDetails, Long productId) {
         User tokenUser = findUserByEmail(customUserDetails);
         if (!isAdmin(tokenUser)){

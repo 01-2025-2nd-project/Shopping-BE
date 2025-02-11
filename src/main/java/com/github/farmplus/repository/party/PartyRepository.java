@@ -17,6 +17,7 @@ import java.util.Optional;
 @Repository
 public interface PartyRepository extends JpaRepository<Party,Long> {
     List<Party> findAllByProduct(Product product);
+
     @Query("SELECT p FROM Party p JOIN FETCH p.partyUserList WHERE p.product = :product")
     List<Party> findAllByProductWithUsers(Product product);
     @Lock(LockModeType.PESSIMISTIC_WRITE)

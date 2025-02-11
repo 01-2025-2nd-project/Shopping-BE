@@ -11,6 +11,8 @@ import com.github.farmplus.web.dto.base.ResponseDto;
 import com.github.farmplus.web.dto.notification.UnreadNotification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +28,8 @@ public class NotificationService {
     private final PartyRepository partyRepository;
 
     @Transactional
-    public ResponseDto readNotificationsResult(List<Long> notificationIds) {
+    @CacheEvict(value = "notificationList", key = "customUserDetails.userId")
+    public ResponseDto readNotificationsResult(List<Long> notificationIds,CustomUserDetails customUserDetails) {
         List<Notification> notifications = notificationRepository.findAllById(notificationIds);
         notifications.forEach(notification -> notification.updateIsRead(true));  // 알림 읽음 처리
         notificationRepository.saveAll(notifications);
@@ -34,6 +37,7 @@ public class NotificationService {
 
     }
 
+    @Cacheable(value = "notificationList",key = "customUserDetails.userId")
     public ResponseDto getNotificationList(CustomUserDetails customUserDetails) {
         User user = userRepository.findByEmailFetchJoin(customUserDetails.getEmail())
                 .orElseThrow(()-> new NotFoundException("해당 유저를 찾을 수 없습니다."));

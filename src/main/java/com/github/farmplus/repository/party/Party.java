@@ -61,7 +61,6 @@ public class Party extends BaseEntity {
         this.endDate = makeParty.getEndDate();
         this.status = PartyStatus.RECRUITING;
         this.capacity = makeParty.getPurchaseCount();
-
     }
     public void updatePartyStatus(PartyStatus partyStatus){
         this.status = partyStatus;
