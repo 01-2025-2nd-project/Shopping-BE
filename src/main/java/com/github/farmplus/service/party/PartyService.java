@@ -31,6 +31,7 @@ import com.github.farmplus.web.dto.party.request.MakeParty;
 import com.github.farmplus.web.dto.party.response.MyParty;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -125,6 +126,7 @@ public class PartyService {
         return new ResponseDto(HttpStatus.OK.value(),"파티 등록이 되었습니다.");
     }
     @Transactional
+    @CacheEvict(value = "notificationList", key = "#customUserDetails.userId")
     public ResponseDto updatePartyResult(CustomUserDetails customUserDetails, MakeParty makeParty,Long partyId) {
         User user = tokenUser(customUserDetails);
         Party party = findPartyById(partyId);
@@ -198,7 +200,7 @@ public class PartyService {
             isCheckProductStock(party,discount);
             List<PartyUser> updatePartyUserList = partyUserRepository.findAllByParty(party);
             log.info("구매로 넘어가기 전");
-            List<Order> orders = updatePartyUserList.stream().map(Order::of).toList();
+            List<Order> orders = updatePartyUserList.stream().map(Order::from).toList();
             //구매로 넘어갈 시 동시성 고려
             log.info("구매로 넘어간 후");
 
