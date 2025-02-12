@@ -183,6 +183,8 @@ public class PartyService {
     @Caching(evict = {
             @CacheEvict(value = "notificationList", key = "#customUserDetails.userId"),
             @CacheEvict(value = "myParty", allEntries = true),
+            @CacheEvict(value="orderList", allEntries = true),
+            @CacheEvict(value = "totalOrderCount", key = "#customUserDetails.userId")
     })
     public ResponseDto joinPartyResult(CustomUserDetails customUserDetails, Long partyId) {
         User user =tokenUser(customUserDetails);
