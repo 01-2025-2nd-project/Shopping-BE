@@ -15,6 +15,9 @@ import com.github.farmplus.web.dto.count.TotalCount;
 import com.github.farmplus.web.dto.order.request.OrderRequest;
 import com.github.farmplus.web.dto.order.response.MyOrder;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -36,6 +39,11 @@ public class OrderService {
     private final UserRepository userRepository; // 추가
 
     @Transactional //자동저장 (중간 에러 발생시 원위치)
+    @Caching(evict = {
+            @CacheEvict(value = "orderList", allEntries = true),
+            @CacheEvict(value = "totalOrderCount", key = "#customUserDetails.userId")
+    })
+
     public boolean processOrder(CustomUserDetails customUserDetails, Long productId, OrderRequest orderRequest) {
         // 사용자 정보 가져오기
         User user = userRepository.findById(customUserDetails.getUserId())
@@ -62,6 +70,7 @@ public class OrderService {
     }
 
     // 주문 목록 조회 메서드
+    @Cacheable(value="orderList", key="#customUserDetails.userId + '_' + pageNum")
     public Page<MyOrder> getOrderList(CustomUserDetails customUserDetails, Integer pageNum) {
         User user = userRepository.findById(customUserDetails.getUserId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
@@ -74,6 +83,7 @@ public class OrderService {
 
 
     // 완료된 주문의 총 개수 조회 메서드
+    @Cacheable(value = "totalOrderCount", key = "#customUserDetails.userId")
     public TotalCount getTotalOrderCount(CustomUserDetails customUserDetails) {
         User user = userRepository.findById(customUserDetails.getUserId())
                 .orElseThrow(() -> new NotFoundException(customUserDetails.getUserId() + "에 해당하는 사용자를 찾을 수 없습니다."));

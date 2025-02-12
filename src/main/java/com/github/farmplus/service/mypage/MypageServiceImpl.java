@@ -8,6 +8,8 @@ import com.github.farmplus.service.mypage.MypageService;
 import com.github.farmplus.web.dto.mypage.ProfileUpdateRequest;
 import com.github.farmplus.web.dto.auth.ProfileResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,6 +23,7 @@ public class MypageServiceImpl implements MypageService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
+    @Cacheable(value="myProfile", key="#customUserDetails.userId")
     public ProfileResponse getProfile(CustomUserDetails customUserDetails) {
         // @AuthenticationPrincipal을 통해 인증된 사용자의 정보를 받아옵니다.
         User user = userRepository.findByEmailFetchJoin(customUserDetails.getEmail())
@@ -32,6 +35,7 @@ public class MypageServiceImpl implements MypageService {
 
     @Override
     @Transactional //바꾼값으로 알아서 저장 (변경할때만.. 새로 만드는건 .save 필요)
+    @CacheEvict(value = "myProfile", key="#customUserDetails.userId")
     public boolean updateProfile(ProfileUpdateRequest updateRequest, CustomUserDetails customUserDetails) {
         // @AuthenticationPrincipal을 통해 인증된 사용자의 정보를 받아옵니다.
         User user = userRepository.findByEmailFetchJoin(customUserDetails.getEmail())
@@ -45,6 +49,7 @@ public class MypageServiceImpl implements MypageService {
     }
 
     @Override
+    @CacheEvict(value = "myProfile", key = "#customUserDetails.userId")
     public boolean deleteProfile(CustomUserDetails customUserDetails) {
         // @AuthenticationPrincipal을 통해 인증된 사용자의 정보를 받아옵니다.
         User user = userRepository.findByEmailFetchJoin(customUserDetails.getEmail())
