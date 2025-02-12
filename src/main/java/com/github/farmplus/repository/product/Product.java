@@ -20,7 +20,7 @@ import java.util.List;
 @Table(name="product")
 public class Product extends BaseEntity {
     @Id@GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "productId")
+    @Column(name = "product_id")
     private Long productId;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id",nullable = false)
@@ -54,5 +54,6 @@ public class Product extends BaseEntity {
     public void updateStock(Long stock) {
         this.stock =stock;
     }
+
 
 }

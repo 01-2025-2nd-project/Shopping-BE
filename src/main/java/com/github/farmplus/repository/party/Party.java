@@ -50,7 +50,7 @@ public class Party extends BaseEntity {
                 .partyName(makeParty.getPartyName())
                 .endDate(makeParty.getEndDate())
                 .status(PartyStatus.RECRUITING)
-                .capacity(makeParty.getCapacity())
+                .capacity(makeParty.getPurchaseCount())
                 .build();
 
     }
@@ -60,7 +60,7 @@ public class Party extends BaseEntity {
         this.partyName = makeParty.getPartyName();
         this.endDate = makeParty.getEndDate();
         this.status = PartyStatus.RECRUITING;
-        this.capacity = makeParty.getCapacity();
+        this.capacity = makeParty.getPurchaseCount();
 
     }
     public void updatePartyStatus(PartyStatus partyStatus){

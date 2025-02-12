@@ -5,6 +5,7 @@ import com.github.farmplus.repository.party.Party;
 import com.github.farmplus.repository.partyUser.PartyUser;
 import com.github.farmplus.repository.product.Product;
 import com.github.farmplus.repository.user.User;
+import com.github.farmplus.web.dto.order.request.OrderRequest;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,7 +30,7 @@ public class Order extends BaseEntity {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "party_id", nullable = false)
+    @JoinColumn(name = "party_id")
     private Party party;
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
@@ -37,8 +38,9 @@ public class Order extends BaseEntity {
     private Long price;
     @Column(name = "final_price", nullable = false)
     private Double finalPrice;
+    @Enumerated(EnumType.STRING)
 
-    public static Order of(PartyUser partyUser){
+    public static Order from(PartyUser partyUser){
         return Order.builder()
                 .user(partyUser.getUser())
                 .product(partyUser.getParty().getProduct())
@@ -49,9 +51,22 @@ public class Order extends BaseEntity {
                 .build();
     }
 
+    public static Order of(User user, Product product, OrderRequest orderRequest){
+        return Order.builder()
+                .user(user)
+                .product(product)
+                .party(null)
+                .quantity(orderRequest.getQuantity())
+                .price(product.getPrice() * orderRequest.getQuantity())
+                .finalPrice((double) (product.getPrice() * orderRequest.getQuantity()))
+                .build();
+    }
+
+
     public void updateParty(Party party){
         this.party = party;
     }
 
 
 }
+

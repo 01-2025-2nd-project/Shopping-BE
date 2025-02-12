@@ -21,6 +21,7 @@ import com.github.farmplus.web.dto.product.response.ProductOption;
 import com.github.farmplus.web.dto.product.response.ProductParty;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -98,6 +99,7 @@ public class ProductService {
         return products.map(ProductMain::of);
     }
 
+    @Cacheable(value = "productDetail" , key = "#productId")
     public ResponseDto productDetailResult(Long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(()-> new NotFoundException(productId + "에 해당하는 상품을 찾을 수 없습니다."));
@@ -107,6 +109,7 @@ public class ProductService {
         ProductDetail productDetail = ProductDetail.of(product,productOptions);
         return new ResponseDto(HttpStatus.OK.value(),"조회 성공",productDetail);
     }
+
 
     public ResponseDto productPartyResult(Long productId) {
         Product product = productRepository.findById(productId)
@@ -122,5 +125,24 @@ public class ProductService {
         Integer productTotalCount = productRepository.findProductTotalCount();
         TotalCount totalCount = TotalCount.of(productTotalCount);
         return new ResponseDto(HttpStatus.OK.value(),"상품 총 개수 조회 성공" ,totalCount);
+    }
+
+    @Cacheable(value = "productTotalCount",key = "#category")
+    public ResponseDto productTotalCountByCategoryResult(String category) {
+        if (category.equals("all")){
+           return productTotalCountResult();
+        }else {
+            Integer productTotalCount = productRepository.findProductByCategoryTotalCount(category);
+            TotalCount totalCount = TotalCount.of(productTotalCount);
+            return new ResponseDto(HttpStatus.OK.value(),"상품 총 개수 조회 성공" ,totalCount);
+        }
+
+    }
+
+    public ResponseDto searchProduct(String keyword, Integer pageNum) {
+        Pageable pageable = PageRequest.of(pageNum,10);
+        Page<ProductWithOrderAndParty> products = productRepository.findSearchProduct(keyword,pageable);
+        Page<ProductMain> productMains = products.map(ProductMain::of);
+        return new ResponseDto(HttpStatus.OK.value(),"검색 결과 조회 성공", productMains);
     }
 }

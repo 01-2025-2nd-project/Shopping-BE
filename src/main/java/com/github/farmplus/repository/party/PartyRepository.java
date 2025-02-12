@@ -26,4 +26,6 @@ public interface PartyRepository extends JpaRepository<Party,Long> {
 
     @Query("SELECT COUNT(pa) FROM Party pa")
     Integer findPartyTotalCount();
+    @Query("SELECT COUNT(p) FROM Party p JOIN p.partyUserList pu WHERE pu.user.userId = :userId")
+    Integer findMyPartyTotalCount(Integer userId);
 }

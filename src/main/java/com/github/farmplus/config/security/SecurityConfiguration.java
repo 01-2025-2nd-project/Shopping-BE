@@ -36,6 +36,7 @@ public class SecurityConfiguration {
                 .formLogin((fl)->fl.disable())
                 .rememberMe((rm)->rm.disable())
                 .sessionManagement(sm->sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .cors(c-> c.configurationSource(corsConfig()))
                 .authorizeHttpRequests((requests) -> requests
                         .anyRequest().permitAll()  // 모든 요청에 대해 인증 없이 접근 허용
                 )
@@ -45,15 +46,20 @@ public class SecurityConfiguration {
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
-    @Bean
-    public CorsConfigurationSource corsConfig() {
+
+    private CorsConfigurationSource corsConfig() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowCredentials(true);
-        corsConfiguration.setAllowedOrigins(List.of("*"));
+        corsConfiguration.setAllowCredentials(false);
+        corsConfiguration.setAllowedOrigins(List.of(
+                "https://frontend-ecru-phi-22.vercel.app",  // 배포된 프론트엔드 URL
+                "http://localhost:3000",                    // 로컬 환경에서 실행되는 프론트엔드 URL (예: React 앱)
+                "http://localhost:8080",
+                "https://*.ngrok.io",                       // ngrok URL 패턴 (동적 URL 허용)
+                "https://jiangxy.github.io" ));
         corsConfiguration.addAllowedHeader("*");
         corsConfiguration.addExposedHeader("Authorization"); //추가
         corsConfiguration.setExposedHeaders(Arrays.asList("Authorization", "Authorization-refresh", "token"));
-        corsConfiguration.setAllowedMethods(List.of("GET","PUT","POST","DELETE"));
+        corsConfiguration.setAllowedMethods(List.of("GET","PUT","POST","DELETE","OPTIONS"));
         corsConfiguration.setMaxAge(1000L*60*60);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**",corsConfiguration);

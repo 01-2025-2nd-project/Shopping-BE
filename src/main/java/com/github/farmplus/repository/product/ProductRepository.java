@@ -92,10 +92,20 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
             "GROUP BY p " +
             "ORDER BY p.price ASC")
     Page<ProductWithOrderAndParty> findAllByCategoryOrderByPriceAsc(Category category,Pageable pageable);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT p FROM Product p WHERE p.productId = :id")
     Optional<Product> findByIdWithLock(@Param("id") Long id);
 
     @Query("SELECT COUNT(p) FROM Product p")
     Integer findProductTotalCount();
+    @Query("SELECT COUNT(p) FROM Product p WHERE p.category.categoryName =:category")
+    Integer findProductByCategoryTotalCount(String category);
+    @Query("SELECT new com.github.farmplus.repository.product.ProductWithOrderAndParty(p, COUNT(o), COUNT(pa)) " +
+            "FROM Product p " +
+            "LEFT JOIN p.orders o " +
+            "LEFT JOIN p.parties pa " +
+            "WHERE p.productName LIKE %:keyword% "+
+            "GROUP BY p")
+    Page<ProductWithOrderAndParty> findSearchProduct(@Param("keyword")String keyword, Pageable pageable);
 }

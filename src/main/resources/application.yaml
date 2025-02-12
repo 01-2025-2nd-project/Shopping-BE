@@ -5,13 +5,13 @@ spring:
   datasource:
     username: ${USERNAME}
     password: ${PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/farm_plus?useUnicode=true&characterEncoding=UTF-8
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://database-1.cvo0mcig6l5w.ap-northeast-2.rds.amazonaws.com:3306/farm_plus?useUnicode=true&characterEncoding=UTF-8
   jpa:
     show-sql: true
     database-platform: org.hibernate.dialect.MySQL8Dialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
   logging:
     level:
       io.netty.resolver.dns: DEBUG
@@ -34,3 +34,8 @@ security:
           authorization-uri: https://kauth.kakao.com/oauth/authorize
           token-uri: https://kauth.kakao.com/oauth/token
           user-info-uri: https://kapi.kakao.com/v2/user/me
+
+
+gradle:
+  java:
+    home: "/usr/lib/jvm/java-17-openjdk-amd64"

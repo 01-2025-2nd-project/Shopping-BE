@@ -2,6 +2,8 @@ package com.github.farmplus.service.party;
 
 import com.github.farmplus.repository.discount.Discount;
 import com.github.farmplus.repository.discount.DiscountRateRepository;
+import com.github.farmplus.repository.notification.Notification;
+import com.github.farmplus.repository.notification.NotificationRepository;
 import com.github.farmplus.repository.order.Order;
 import com.github.farmplus.repository.order.OrderRepository;
 import com.github.farmplus.repository.party.Party;
@@ -24,21 +26,23 @@ import com.github.farmplus.service.exceptions.StockShortageException;
 import com.github.farmplus.service.exceptions.UnauthorizedDeleteException;
 import com.github.farmplus.web.dto.base.ResponseDto;
 import com.github.farmplus.web.dto.count.TotalCount;
+import com.github.farmplus.web.dto.notification.NotificationDto;
 import com.github.farmplus.web.dto.party.request.MakeParty;
 import com.github.farmplus.web.dto.party.response.MyParty;
-import com.github.farmplus.web.dto.party.response.PartyMember;
-import com.github.farmplus.web.dto.party.response.PartyMemberName;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,23 +57,24 @@ public class PartyService {
     private final DiscountRateRepository discountRateRepository;
     private final ProductDiscountRepository productDiscountRepository;
     private final OrderRepository orderRepository;
+    private final NotificationRepository notificationRepository;
+    private final SimpMessagingTemplate messagingTemplate;
+    @Cacheable(value = "myParty", key = "#customUserDetails.userId +'_' +pageNum")
     public ResponseDto getMyPartyResult(CustomUserDetails customUserDetails, Integer pageNum) {
 
         User user = tokenUser(customUserDetails);
         log.info("user : " + user);
         Pageable pageable = PageRequest.of(pageNum,10);
 
-        List<PartyUser> partyUserPage = partyUserRepository.findAllByUser(user);
+        Page<PartyUser> partyUserPage = partyUserRepository.findAllByUser(user,pageable);
 
-        List<MyParty> myParties =  partyUserPage.stream().map(MyParty::of).collect(Collectors.toList());
-        int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), myParties.size());
-        List<MyParty> pageContent = myParties.subList(start, end);
-        Page<MyParty> parties = new PageImpl<>(pageContent, pageable, myParties.size());
-        return new ResponseDto(HttpStatus.OK.value(),"조회 성공",parties);
+        Page<MyParty> myParties =  partyUserPage.map(MyParty::of);
+
+        return new ResponseDto(HttpStatus.OK.value(),"조회 성공",myParties);
 
     }
     @Transactional
+    @CacheEvict(value = "myParty", allEntries = true)
     public ResponseDto deletePartyResult(CustomUserDetails customUserDetails, Long partyId) {
         //토큰으로 유저 찾기
         User user = tokenUser(customUserDetails);
@@ -90,6 +95,7 @@ public class PartyService {
         return new ResponseDto(HttpStatus.OK.value(),"파티가 삭제되었습니다.");
     }
     @Transactional
+    @CacheEvict(value = "myParty", allEntries = true)
     public ResponseDto makePartyResult(CustomUserDetails customUserDetails, MakeParty makeParty) {
         User user = tokenUser(customUserDetails);
         log.info("유저 : " +user);
@@ -100,14 +106,23 @@ public class PartyService {
         Discount discount = findDiscountById(discountId);
         ProductDiscount productDiscount = findProductDiscount(product,discount);
         // 등록하려는 파티의 모집인원 수와 구매개수를 곱한 값이 상품의 현재 수량보다 많다면 구매 불가
-        Long buyCapacity = (long) makeParty.getCapacity() * discount.getPeople();
+        Long buyCapacity = (long) makeParty.getPurchaseCount() * discount.getPeople();
         validateStockAvailability(product,buyCapacity);
         Double salePrice = product.getPrice() -( product.getPrice() * discount.getDiscountRate());
-        Double saleTotalPrice = salePrice * makeParty.getCapacity();
-        if ( saleTotalPrice > user.getMoney() ){
-            throw new BadRequestException("현재 구매하려는 가격 : " +saleTotalPrice +" 현재 가지고 있는 돈 : " + user.getMoney() +"이므로 파티 등록이 불가능합니다.");
+        Double saleTotalPrice = salePrice * makeParty.getPurchaseCount();
+//        if ( saleTotalPrice > user.getMoney() ){
+//            throw new BadRequestException("현재 구매하려는 가격 : " +saleTotalPrice +" 현재 가지고 있는 돈 : " + user.getMoney() +"이므로 파티 등록이 불가능합니다.");
+//        }
+        //동시성이 발생하지 않게
+        //여러 개의 요청이 들어와도 UPDATE가 원자적으로 실행됨
+        //WHERE money >= amount 덕분에 잔액 부족 시 업데이트 방지됨
+        //user.updateMoney()처럼 엔티티를 가져와 변경하는 방식은 JPA의 변경 감지를 사용하므로,
+        //여러 요청이 동시에 들어오면 낙관적 락(Optimistic Lock) 충돌 가능성이 있음
+        //바로 UPDATE하는 방식이 더 빠르고 안정적
+        int updatedRows = userRepository.deductMoney(user.getUserId(), saleTotalPrice);
+        if (updatedRows == 0) {
+            throw new BadRequestException("잔액 부족 또는 동시성 문제 발생");
         }
-        user.updateMoney(user.getMoney() - saleTotalPrice);
         Party party = Party.of(product,productDiscount,makeParty);
         Party saveParty = partyRepository.save(party);
         PartyUser partyUser = PartyUser.host(user,saveParty,saleTotalPrice);
@@ -116,6 +131,10 @@ public class PartyService {
         return new ResponseDto(HttpStatus.OK.value(),"파티 등록이 되었습니다.");
     }
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "notificationList", key = "#customUserDetails.userId"),
+            @CacheEvict(value = "myParty", allEntries = true)
+    })
     public ResponseDto updatePartyResult(CustomUserDetails customUserDetails, MakeParty makeParty,Long partyId) {
         User user = tokenUser(customUserDetails);
         Party party = findPartyById(partyId);
@@ -136,11 +155,11 @@ public class PartyService {
             throw new BadRequestException("상품 변경은 불가능합니다.");
         }
         // 등록하려는 파티의 모집인원 수와 구매개수를 곱한 값이 상품의 현재 수량보다 많다면 구매 불가
-        Long buyCapacity = (long) makeParty.getCapacity() * discount.getPeople();
+        Long buyCapacity = (long) makeParty.getPurchaseCount() * discount.getPeople();
         validateStockAvailability(product,buyCapacity);
 
         Double salePrice = product.getPrice() -( product.getPrice() * discount.getDiscountRate());
-        final Double saleTotalPrice = salePrice * makeParty.getCapacity();
+        final Double saleTotalPrice = salePrice * makeParty.getPurchaseCount();
 
         List<PartyUserAmount> partyUsers = partyUserRepository.findPartyUserAmounts(party);
         log.info("partyUser : " + partyUsers);
@@ -161,6 +180,10 @@ public class PartyService {
 
     }
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "notificationList", key = "#customUserDetails.userId"),
+            @CacheEvict(value = "myParty", allEntries = true),
+    })
     public ResponseDto joinPartyResult(CustomUserDetails customUserDetails, Long partyId) {
         User user =tokenUser(customUserDetails);
         Party party = partyRepository.findByIdWithLock(partyId)
@@ -178,7 +201,10 @@ public class PartyService {
         //파티 참여 시 유저 머니 차감
         //파티 참여 시 마지막 파티원이면 자동으로 구매 유저 머니 차감
         //파티 참여시 동시성 고려
-        user.updateMoney(user.getMoney()-payment);
+        int updatedRows = userRepository.deductMoney(user.getUserId(), payment);
+        if (updatedRows == 0) {
+            throw new BadRequestException("잔액 부족 또는 동시성 문제 발생");
+        }
         PartyUser joinPartyUser = PartyUser.member(user,party,payment);
         partyUserRepository.save(joinPartyUser);
         if ( partyUsers.size() == (discount.getPeople() - 1) ){
@@ -186,19 +212,31 @@ public class PartyService {
             isCheckProductStock(party,discount);
             List<PartyUser> updatePartyUserList = partyUserRepository.findAllByParty(party);
             log.info("구매로 넘어가기 전");
-            List<Order> orders = updatePartyUserList.stream().map(Order::of).toList();
+            List<Order> orders = updatePartyUserList.stream().map(Order::from).toList();
             //구매로 넘어갈 시 동시성 고려
             log.info("구매로 넘어간 후");
 
             party.updatePartyStatus(PartyStatus.COMPLETED);
             orderRepository.saveAll(orders);
+            // 알림 생성 및 전송
+            sendNotifications(party, updatePartyUserList);
+
             return new ResponseDto(HttpStatus.CREATED.value(),"파티 마지막 참여자이므로 결제 완료되었습니다..");
         }
 
 
         return new ResponseDto(HttpStatus.CREATED.value(),"파티 참여에 성공했습니다.");
     }
+    // 알림 생성 후 WebSocket으로 전송
+    private void sendNotifications(Party party, List<PartyUser> partyUsers) {
+        partyUsers.stream()
+                .map(Notification::from)  // PartyUser를 Notification으로 변환
+                .peek(notificationRepository::save) // 알림 저장
+                .map(NotificationDto::from)  // Notification을 NotificationDto로 변환
+                .forEach(notificationDto -> messagingTemplate.convertAndSend("/topic/notifications/" + notificationDto.getEmail(), notificationDto));
+    }
     @Transactional
+    @CacheEvict(value = "myParty",allEntries = true)
     public ResponseDto deleteJoinPartyResult(CustomUserDetails customUserDetails, Long partyId) {
         User user = tokenUser(customUserDetails);
         Party party = findPartyById(partyId);
@@ -220,7 +258,11 @@ public class PartyService {
         //해당 파티에서 PartyUser리스트에서 해당 유저 지우기
         partyUserRepository.deleteByUserAndParty(user,party);
         //원래 돈 복귀시키기
-        user.updateMoney(user.getMoney() + partyUsers.get(0).getPaymentAmount());
+        //동시성 고려
+        int updatedRows = userRepository.updateMoney(user.getUserId(),partyUsers.get(0).getPaymentAmount() );
+        if (updatedRows == 0) {
+            throw new BadRequestException("잔액 업데이트 실패");
+        }
         return new ResponseDto(HttpStatus.OK.value(),"파티 탈퇴가 되었습니다.");
 
 
@@ -237,6 +279,11 @@ public class PartyService {
 
             // User의 money 업데이트
             updateUser.updateMoney(updateUser.getMoney() + userMoney);
+
+            int updatedRows = userRepository.updateMoney(updateUser.getUserId(), userMoney);
+            if (updatedRows == 0) {
+                throw new BadRequestException("잔액 업데이트 실패");
+            }
 
             // PartyUser의 paymentAmount 업데이트
             partyUser.updatePaymentAmount(saleTotalPrice);
@@ -407,6 +454,13 @@ public class PartyService {
     public ResponseDto partyTotalCountResult() {
         Integer partyTotalCount = partyRepository.findPartyTotalCount();
         TotalCount totalCount = TotalCount.of(partyTotalCount);
+        return new ResponseDto(HttpStatus.OK.value(),"파티 총 개수 조회 성공" ,totalCount);
+    }
+
+    public ResponseDto myPartyTotalCountResult(CustomUserDetails customUserDetails) {
+
+        Integer myPartyTotalCount = partyRepository.findMyPartyTotalCount(customUserDetails.getUserId());
+        TotalCount totalCount = TotalCount.of(myPartyTotalCount);
         return new ResponseDto(HttpStatus.OK.value(),"파티 총 개수 조회 성공" ,totalCount);
     }
 }

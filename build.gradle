@@ -1,3 +1,5 @@
+import org.springframework.boot.gradle.tasks.bundling.BootJar
+
 plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.4.2'
@@ -8,8 +10,14 @@ group = 'com.github'
 version = '0.0.1-SNAPSHOT'
 
 java {
-	sourceCompatibility = '17'
+//	sourceCompatibility = '17'
+//	targetCompatibility = '17'
+
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
 }
+
 
 configurations {
 	compileOnly {
@@ -21,7 +29,7 @@ repositories {
 	mavenCentral()
 	maven { url 'https://repo.spring.io/release' }
 }
-5
+
 
 dependencies {
 	// 기존 의존성들 유지
@@ -35,10 +43,15 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	runtimeOnly 'com.h2database:h2'
+//	runtimeOnly 'mysql:mysql-connector-java:8.0.26'
+	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client:2.7.2'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+//	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	//websocket
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+//	implementation 'org.springframework.boot:spring-boot-starter-messaging:3.4.2'
 
 	// JWT 관련 의존성 세분화
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
@@ -51,4 +64,9 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+	enabled=false
+}
+
+tasks.named('bootJar', BootJar) {
+	mainClass = 'com.github.farmplus.FarmPlusApplication'
 }

@@ -28,8 +28,17 @@ public class ProductController {
     public ResponseDto productParty(@PathVariable("productId") Long productId){
         return productService.productPartyResult(productId);
     }
+
     @GetMapping("/total")
-    public ResponseDto productTotalCount(){
-        return productService.productTotalCountResult();
+    public ResponseDto productTotalCountByCategory(@RequestParam(required = false, defaultValue = "all",value = "category") String category){
+        log.info(category);
+        return productService.productTotalCountByCategoryResult(category);
+    }
+    @GetMapping("/search")
+    public ResponseDto searchProduct(@RequestParam(required = false,defaultValue = "",value = "keyword")String keyword,
+                                     @RequestParam(required = false,defaultValue = "0", value = "page" )Integer pageNum){
+        log.info("keyword : " + keyword);
+        log.info("paegeNum : " + pageNum);
+        return productService.searchProduct(keyword,pageNum);
     }
 }
