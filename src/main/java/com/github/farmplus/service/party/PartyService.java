@@ -32,6 +32,8 @@ import com.github.farmplus.web.dto.party.response.MyParty;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -57,6 +59,7 @@ public class PartyService {
     private final OrderRepository orderRepository;
     private final NotificationRepository notificationRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    @Cacheable(value = "myParty", key = "#customUserDetails.userId +'_' +pageNum")
     public ResponseDto getMyPartyResult(CustomUserDetails customUserDetails, Integer pageNum) {
 
         User user = tokenUser(customUserDetails);
@@ -71,6 +74,7 @@ public class PartyService {
 
     }
     @Transactional
+    @CacheEvict(value = "myParty", allEntries = true)
     public ResponseDto deletePartyResult(CustomUserDetails customUserDetails, Long partyId) {
         //토큰으로 유저 찾기
         User user = tokenUser(customUserDetails);
@@ -91,6 +95,7 @@ public class PartyService {
         return new ResponseDto(HttpStatus.OK.value(),"파티가 삭제되었습니다.");
     }
     @Transactional
+    @CacheEvict(value = "myParty", allEntries = true)
     public ResponseDto makePartyResult(CustomUserDetails customUserDetails, MakeParty makeParty) {
         User user = tokenUser(customUserDetails);
         log.info("유저 : " +user);
@@ -126,7 +131,10 @@ public class PartyService {
         return new ResponseDto(HttpStatus.OK.value(),"파티 등록이 되었습니다.");
     }
     @Transactional
-    @CacheEvict(value = "notificationList", key = "#customUserDetails.userId")
+    @Caching(evict = {
+            @CacheEvict(value = "notificationList", key = "#customUserDetails.userId"),
+            @CacheEvict(value = "myParty", allEntries = true)
+    })
     public ResponseDto updatePartyResult(CustomUserDetails customUserDetails, MakeParty makeParty,Long partyId) {
         User user = tokenUser(customUserDetails);
         Party party = findPartyById(partyId);
@@ -172,6 +180,10 @@ public class PartyService {
 
     }
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "notificationList", key = "#customUserDetails.userId"),
+            @CacheEvict(value = "myParty", allEntries = true),
+    })
     public ResponseDto joinPartyResult(CustomUserDetails customUserDetails, Long partyId) {
         User user =tokenUser(customUserDetails);
         Party party = partyRepository.findByIdWithLock(partyId)
@@ -224,6 +236,7 @@ public class PartyService {
                 .forEach(notificationDto -> messagingTemplate.convertAndSend("/topic/notifications/" + notificationDto.getEmail(), notificationDto));
     }
     @Transactional
+    @CacheEvict(value = "myParty",allEntries = true)
     public ResponseDto deleteJoinPartyResult(CustomUserDetails customUserDetails, Long partyId) {
         User user = tokenUser(customUserDetails);
         Party party = findPartyById(partyId);

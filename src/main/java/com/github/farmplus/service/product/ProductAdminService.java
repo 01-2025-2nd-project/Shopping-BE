@@ -15,8 +15,10 @@ import com.github.farmplus.web.dto.product.response.CategoryResponse;
 import com.github.farmplus.web.dto.product.request.ProductRegister;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.Cache;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -58,7 +60,9 @@ public class ProductAdminService {
         return new ResponseDto(HttpStatus.CREATED.value(),product.getProductName()+"이 정상적으로 등록되었습니다.");
     }
 
-    @CacheEvict(value = "productDetail", key = "#productId")
+    @Caching(evict = {
+            @CacheEvict(value = "productDetail", key = "#productId"),
+    })
     @Transactional
     public ResponseDto productUpdateResult(CustomUserDetails customUserDetails, ProductRegister productRegister, Long productId) {
         User tokenUser = findUserByEmail(customUserDetails);
