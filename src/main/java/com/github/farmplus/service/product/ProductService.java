@@ -110,6 +110,7 @@ public class ProductService {
         return new ResponseDto(HttpStatus.OK.value(),"조회 성공",productDetail);
     }
 
+
     public ResponseDto productPartyResult(Long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(()-> new NotFoundException(productId + "에 해당하는 상품을 찾을 수 없습니다."));
