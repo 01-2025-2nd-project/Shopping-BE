@@ -43,8 +43,6 @@ public class MypageServiceImpl implements MypageService {
 
 
         user.updateUser(updateRequest);
-        String password = passwordEncoder.encode(updateRequest.getPassword());
-        user.passwordSave(password);
         return true;
     }
 
