@@ -39,12 +39,6 @@
 
 
 ### 4. ERD
-
-
-<img width="860" alt="Screenshot 2024-04-02 at 13 59 44" src="[https://github.com/soheeparklee/sc_project01_April2024_verSoh/assets/97790983/485cd5cf-35dd-405a-8feb-c507ce47294b](https://github.com/user-attachments/assets/a0cb2fc7-cb6f-4458-9762-68a060df74e4)">
-<img width="553" alt="Screenshot 2024-04-05 at 17 39 23" src=["https://github.com/soheeparklee/sc_project01_April2024_verSoh/assets/97790983/63b4d5f5-2327-4a6f-aea7-74aea0e9a6c6]
-
-
 ![image](https://github.com/user-attachments/assets/143542b9-9780-4157-8857-eb9ec9b592d8)
 
 
