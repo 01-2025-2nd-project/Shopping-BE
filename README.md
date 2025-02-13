@@ -39,10 +39,10 @@
 
 
 ### 4. ERD
-<img width="860" src="[[https://github.com/soheeparklee/sc_project01_April2024_verSoh/assets/97790983/485cd5cf-35dd-405a-8feb-c507ce47294b](https://github.com/user-attachments/assets/a0cb2fc7-cb6f-4458-9762-68a060df74e4)](https://github.com/user-attachments/assets/44c487e2-b48d-4a6e-8eb7-ab337e788c37)">
-![image](https://github.com/user-attachments/assets/a0cb2fc7-cb6f-4458-9762-68a060df74e4)
-<img width="860" alt="Screenshot 2024-04-02 at 13 59 44" src="https://github.com/soheeparklee/sc_project01_April2024_verSoh/assets/97790983/485cd5cf-35dd-405a-8feb-c507ce47294b">
-<a href="https://brandlogos.net/download-java-ai-eps-crd-1608.html">AngularJS logo</a>
+
+
+<img width="860" alt="Screenshot 2024-04-02 at 13 59 44" src="[https://github.com/soheeparklee/sc_project01_April2024_verSoh/assets/97790983/485cd5cf-35dd-405a-8feb-c507ce47294b](https://github.com/user-attachments/assets/a0cb2fc7-cb6f-4458-9762-68a060df74e4)">
+
 
 ### 5. Environment Variables
 `username` : MySql username
