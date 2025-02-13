@@ -40,6 +40,10 @@
 
 ### 4. ERD
 ![image.png](attachment:60e463cc-b4fa-48d9-bffe-eefcdd6174f4:image.png)
+![image](https://github.com/user-attachments/assets/44c487e2-b48d-4a6e-8eb7-ab337e788c37)
+
+<img width="860" src="[https://github.com/soheeparklee/sc_project01_April2024_verSoh/assets/97790983/485cd5cf-35dd-405a-8feb-c507ce47294b](https://github.com/user-attachments/assets/44c487e2-b48d-4a6e-8eb7-ab337e788c37)">
+
 
 ### 5. Environment Variables
 `username` : MySql username
@@ -54,11 +58,18 @@
 - ` 이메일 중복 확인 ` :
 
 ### 6. 트러블 슈팅
+
 | 🔴 error                        | 🔵 문제                                                                 | 🟢 해결 방법                                                               |
 |---------------------------------|----------------------------------------------------------------------|--------------------------------------------------------------------------|
-| org.hibernate.MappingException  | BaseEntity를 상속 받는데 BaseEntity와 필드명이 DB 컬럼명과 일치하지 않아 찾을 수 없다는 에러 발생 | 컬럼 명 일치로 해결 완료                                                     |
-| UnsatisfiedDependencyException  | 의존성 도입 도중 repository 메소드에 제대로 된 필드 값이 들어오지 않아 발생                  | JpaRepository에 페이지네이션으로 구현했으나 파라미터에 pageable을 넣지 않아 발생했다. pageable을 파라미터로 넣어주어 해결 |
-| SQLSyntaxErrorException        | 의존성 도입 도중 repository 메소드에 제대로 된 필드 값이 들어오지 않아 발생                  | JpaRepository에 페이지네이션으로 구현했으나 파라미터에 pageable을 넣지 않아 발생했다. pageable을 파라미터로 넣어주어 해결 |
+| `org.hibernate.MappingException`  | BaseEntity를 상속 받는데 BaseEntity와 필드명이 DB 컬럼명과 일치하지 않아 찾을 수 없다는 에러 발생 | 컬럼 명 일치로 해결 완료                                                     |
+| `UnsatisfiedDependencyException`  | 의존성 도입 도중 repository 메소드에 제대로 된 필드 값이 들어오지 않아 발생                  | JpaRepository에 페이지네이션으로 구현했으나 파라미터에 pageable을 넣지 않아 발생했다. pageable을 파라미터로 넣어주어 해결 |
+| `SQLSyntaxErrorException`        | JPQL을 쓰던 중 GroupBy절을 쓰는데 group으로 묶은 필드가 들어오지 않아 발생             | JGroupBy에 필요한 필드들을 담아서 해결 | 
+| `PropertyValueException`        | PartyUser 엔티티는 Party 필드값이 NotNull인데 파티를 먼저 삭제하고 파티 유저를 삭제하려고 하니 파티 유저의 파티 값이 null로 되어 발생                  | 파티유저를 먼저 삭제 후 파티를 삭제하여 해결 | 
+| `N+1`        | @ManyToOne과 @OneToMany 사용 시 조회를 하는 과정에서 한 번의 쿼리문이 아닌 반복적인 쿼리 문 발생                  | 1. 필요한 필드명만 따로 뺀 클래스를 만들어 해결  | 
+|        | Fetch Join을 사용하여 해결                  | 파티유저를 먼저 삭제 후 파티를 삭제하여 해결 | 
+| `cors(Mixed Content)`        | 백엔드가 배포한 프로젝트에서 프론트 배포 주소 허용 안해서 발생                  | 프론트 요청 주소 허용해주는 config 빈으로 등록 후 SecutiryConfig에 추가하여 해결 | 
+| `동시성 문제`        | 파티 등록할 때 여러 사람이 동시에 파티에 참여할 때 참여 가능한 인원수보다 오바되는 경우 발생              | 파티를 조회할 때 낙관적 락을 걸어 처리가 끝난 후에 다음 조회 처리가 가능하도록 하여 해결 |
+|         | 한 사람이 여러 파티에 동시에 가입할 때 돈이 한 파티에 관해서만 빠지는 현상 발생                  | 유저의 돈을 업데이트 할 때 db에서 처리하도록 UserRepository에서 update문을 넣어주어 실행하도록 변경하여 해결 |
 
 
 
