@@ -70,7 +70,7 @@ public class OrderService {
     }
 
     // 주문 목록 조회 메서드
-    @Cacheable(value="orderList", key="#customUserDetails.userId + '_' + pageNum")
+    @Cacheable(value="orderList", key="#customUserDetails.userId + '_' + #pageNum")
     public Page<MyOrder> getOrderList(CustomUserDetails customUserDetails, Integer pageNum) {
         User user = userRepository.findById(customUserDetails.getUserId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));

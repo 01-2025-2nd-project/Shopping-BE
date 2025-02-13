@@ -72,7 +72,7 @@ public class PartyService {
         }
     }
 
-    @Cacheable(value = "myParty", key = "#customUserDetails.userId +'_' +pageNum")
+    @Cacheable(value = "myParty", key = "#customUserDetails.userId +'_' +#pageNum")
     public ResponseDto getMyPartyResult(CustomUserDetails customUserDetails, Integer pageNum) {
 
         User user = tokenUser(customUserDetails);
