@@ -62,7 +62,6 @@ public class PartyService {
     private final NotificationRepository notificationRepository;
     private final SimpMessagingTemplate messagingTemplate;
     @Transactional
-    @Scheduled(cron = "0 */1 * * * *")
     public void updateStatus(){
         LocalDate now = LocalDate.now();
         List<Party> parties =   partyRepository.findAllByEndDateBeforeAndStatus(now,PartyStatus.RECRUITING);
@@ -71,8 +70,6 @@ public class PartyService {
             parties.forEach((p)->log.info("상태: " + p.getStatus()));
 
         }
-
-
     }
 
     @Cacheable(value = "myParty", key = "#customUserDetails.userId +'_' +pageNum")
