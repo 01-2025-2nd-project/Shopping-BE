@@ -40,9 +40,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -59,6 +61,20 @@ public class PartyService {
     private final OrderRepository orderRepository;
     private final NotificationRepository notificationRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    @Transactional
+    @Scheduled(cron = "0 */1 * * * *")
+    public void updateStatus(){
+        LocalDate now = LocalDate.now();
+        List<Party> parties =   partyRepository.findAllByEndDateBeforeAndStatus(now,PartyStatus.RECRUITING);
+        if (!parties.isEmpty()){
+            parties.forEach((p)->p.updatePartyStatus(PartyStatus.FAILED));
+            parties.forEach((p)->log.info("상태: " + p.getStatus()));
+
+        }
+
+
+    }
+
     @Cacheable(value = "myParty", key = "#customUserDetails.userId +'_' +pageNum")
     public ResponseDto getMyPartyResult(CustomUserDetails customUserDetails, Integer pageNum) {
 
@@ -73,6 +89,9 @@ public class PartyService {
         return new ResponseDto(HttpStatus.OK.value(),"조회 성공",myParties);
 
     }
+//    @Scheduled(cron = "0 0 0 * * *")
+
+
     @Transactional
     @CacheEvict(value = "myParty", allEntries = true)
     public ResponseDto deletePartyResult(CustomUserDetails customUserDetails, Long partyId) {
