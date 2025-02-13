@@ -39,9 +39,6 @@
 
 
 ### 4. ERD
-![image.png](attachment:60e463cc-b4fa-48d9-bffe-eefcdd6174f4:image.png)
-![image](https://github.com/user-attachments/assets/44c487e2-b48d-4a6e-8eb7-ab337e788c37)
-
 <img width="860" src="[https://github.com/soheeparklee/sc_project01_April2024_verSoh/assets/97790983/485cd5cf-35dd-405a-8feb-c507ce47294b](https://github.com/user-attachments/assets/44c487e2-b48d-4a6e-8eb7-ab337e788c37)">
 
 
