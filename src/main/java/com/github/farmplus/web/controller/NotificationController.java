@@ -1,6 +1,8 @@
 package com.github.farmplus.web.controller;
 
 import com.github.farmplus.repository.notification.NotificationRepository;
+import com.github.farmplus.repository.user.JwtUser;
+import com.github.farmplus.repository.user.User;
 import com.github.farmplus.repository.userDetails.CustomUserDetails;
 import com.github.farmplus.service.notification.NotificationService;
 import com.github.farmplus.web.dto.base.ResponseDto;
@@ -19,13 +21,11 @@ import java.util.List;
 public class NotificationController {
     private final NotificationService notificationService;
     @PutMapping("/read")
-    public ResponseDto markNotificationsAsRead(@AuthenticationPrincipal CustomUserDetails customUserDetails,@RequestParam("notification-id") List<Long> notificationIds) {
-        return notificationService.readNotificationsResult(notificationIds,customUserDetails);
+    public ResponseDto markNotificationsAsRead(@JwtUser User user, @RequestParam("notification-id") List<Long> notificationIds) {
+        return notificationService.readNotificationsResult(notificationIds,user);
     }
     @GetMapping("/notifications")
-    public ResponseDto getNotifications(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
-
-
-        return notificationService.getNotificationList(customUserDetails);
+    public ResponseDto getNotifications(@JwtUser User user) {
+        return notificationService.getNotificationList(user);
     }
 }
