@@ -1,5 +1,6 @@
 # FarmPlus Web Project
 ### 팀원 소개
+----------
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;한유진🐰 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 임홍현😺 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | 
 | :--------------- | :--------------- | 
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@yj267](https://github.com/yj267) | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@limhhyeon](https://github.com/limhhyeon) 
@@ -7,6 +8,7 @@
 
 
 ### 1. 프로젝트 소개
+----------
 - 본 프로젝트는 농산물 및 농업 관련 제품을 온라인에서 공동구매 방식으로 구매할 수 있는 쇼핑몰입니다.
 - 농산업의 활성화와 소비자들에게 더 많은 혜택을 제공하는 것을 목표로 인원수에 따른 할인율이 적용됩니다.
 - 유저는 회원가입, 로그인 기능 외에도 마이페이지를 통한 개인정보 수정 및 삭제가 가능합니다.
@@ -16,6 +18,7 @@
  
 
 ### 2. 기술 스택
+----------
 ` Java 17+ ` : 최신 기능과 성능 개선을 위해 사용  
 ` Spring Boot `:  REST API 및 웹 애플리케이션 표준  
 ` Gradle ` : 프로젝트 관리 및 의존성 관리  
@@ -33,21 +36,25 @@
 
 
 ### 3. 환경변수
+----------
 `username` : MySql username  
 `password` : MySql password  
 `secret key` : JWT secretKey  
 
 
 ### 4. ERD
+----------
 ![image](https://github.com/user-attachments/assets/143542b9-9780-4157-8857-eb9ec9b592d8)
 
 
 ### 5. Environment Variables
+----------
 `username` : MySql username  
 `password` : MySql password  
 `secret key` : JWT secretKey  
 
 ### 5. 기능 전략
+----------
 1. Auth
 - ` 로그인 ` :  
 - ` 회원가입 ` :
@@ -71,8 +78,9 @@
 
 
 ### 7. Lessons Learned
+----------
 
-#### Lessons
+### Lessons
 
 #### *ArgumentResolver*
 프로젝트를 진행하면서 토큰 기반 사용자 인증을 효율적으로 처리하기 위해 ArgumentResolver를 적용하는 방법을 배웠습니다. 이를 통해 컨트롤러에서 매번 토큰을 가지고 서비스에서 유저를 조회하는 로직을 제거하고, 반복되었던 코드를 줄일 수 있게되었습니다.
@@ -143,7 +151,7 @@ int deductBalance(@Param("userId") Long userId, @Param("amount") int amount);
 - 경쟁 조건 해결 → SQL 한 줄로 업데이트하므로 동시성 문제가 줄어듦
 - 트랜잭션 충돌 방지 → 기존에 엔터티를 조회하고 수정하는 방식보다 트랜잭션 시간이 짧아져 데드락 위험이 감소
 
-#### Learned
+### Learned
 
 #### *Pagination*
 이번 프로젝트에서는 데이터 처리와 페이지네이션을 다루는 데 어려움을 겪었는데, 팀원이 작성한 페이지네이션 코드를 보면서 효율적인 데이터 표시 방법에 대해 많은 것을 배웠습니다. 특히, 대용량 데이터를 처리할 때 성능을 고려한 페이지네이션의 중요성을 깨달았고, 이를 통해 효율적인 데이터 조회가 가능하다는 점을 알게 되었습니다. 다음 프로젝트에서는 제가 직접 페이지네이션을 적용해 보고, 더 나은 성능을 위해 최적화도 시도해보려 합니다.
