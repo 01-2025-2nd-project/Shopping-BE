@@ -189,6 +189,7 @@ int deductBalance(@Param("userId") Long userId, @Param("amount") int amount);
 
 
 ### 8. Feedback
+----------
 ✔️ setter 사용 X -> 객체 안에 Custom 메소드로 만들어서 사용  
 ✔️ 생성자 of/from 패턴 사용  
 ✔️ 토큰 받아서 유저 조회하는 반복적인 로직 대신 JwtArgumenrResolver 사용  
@@ -196,6 +197,7 @@ int deductBalance(@Param("userId") Long userId, @Param("amount") int amount);
 
 
 ### 9. 회고
+----------
 ***협업*** : 프로젝트를 처음 진행하는 과정에서 백엔드와 프론트간 협업 과정이 익숙치 않아 적응하는 시간이 오래 걸렸지만 주기적인 회의를 통해 코드를 리뷰하고 소통함으로써 성공적으로 프로젝트를 마칠 수 있었습니다. 이를 통해 협업에 대한 이해도가 상승하였고 다음 프로젝트에서는 협업을 하면서 겪었던 어려움을 잘 해결할 수 있을 것으로 기대됩니다 🐰
 
 
