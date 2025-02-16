@@ -25,7 +25,4 @@ import java.util.List;
         partyService.updateStatus();
     }
 
-
-
-
 }

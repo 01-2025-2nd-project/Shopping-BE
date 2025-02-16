@@ -28,10 +28,10 @@ public class NotificationService {
     private final PartyRepository partyRepository;
 
     @Transactional
-    @CacheEvict(value = "notificationList", key = "#customUserDetails.userId")
-    public ResponseDto readNotificationsResult(List<Long> notificationIds,CustomUserDetails customUserDetails) {
-        User user = userRepository.findByEmailFetchJoin(customUserDetails.getEmail())
-                .orElseThrow(()->new NotFoundException(customUserDetails.getEmail() + "에 해당하는 유저를 찾을 수 없습니다."));
+    @CacheEvict(value = "notificationList", key = "#user.userId")
+    public ResponseDto readNotificationsResult(List<Long> notificationIds,User user) {
+//        User user = userRepository.findByEmailFetchJoin(customUserDetails.getEmail())
+//                .orElseThrow(()->new NotFoundException(customUserDetails.getEmail() + "에 해당하는 유저를 찾을 수 없습니다."));
         List<Notification> notifications = notificationRepository.findAllById(notificationIds);
         notifications.forEach(notification -> notification.updateIsRead(true));  // 알림 읽음 처리
         notificationRepository.saveAll(notifications);
@@ -39,10 +39,10 @@ public class NotificationService {
 
     }
 
-    @Cacheable(value = "notificationList",key = "#customUserDetails.userId")
-    public ResponseDto getNotificationList(CustomUserDetails customUserDetails) {
-        User user = userRepository.findByEmailFetchJoin(customUserDetails.getEmail())
-                .orElseThrow(()-> new NotFoundException("해당 유저를 찾을 수 없습니다."));
+    @Cacheable(value = "notificationList",key = "#user.userId")
+    public ResponseDto getNotificationList(User user) {
+//        User user = userRepository.findByEmailFetchJoin(customUserDetails.getEmail())
+//                .orElseThrow(()-> new NotFoundException("해당 유저를 찾을 수 없습니다."));
         List<Notification> notifications = notificationRepository.findAllByUserAndIsRead(user, false);  // 읽지 않은 알림들
         List<UnreadNotification> unreadNotifications = notifications.stream().map(UnreadNotification::from).toList();
         return new ResponseDto(HttpStatus.OK.value(), "안 읽은 알림 리스트 조회 서공",unreadNotifications);

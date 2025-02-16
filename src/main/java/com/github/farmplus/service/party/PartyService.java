@@ -72,10 +72,10 @@ public class PartyService {
         }
     }
 
-    @Cacheable(value = "myParty", key = "#customUserDetails.userId +'_' +#pageNum")
-    public ResponseDto getMyPartyResult(CustomUserDetails customUserDetails, Integer pageNum) {
+    @Cacheable(value = "myParty", key = "#user.userId +'_' +#pageNum")
+    public ResponseDto getMyPartyResult(User user, Integer pageNum) {
 
-        User user = tokenUser(customUserDetails);
+//        User user = tokenUser(customUserDetails);
         log.info("user : " + user);
         Pageable pageable = PageRequest.of(pageNum,10);
 
@@ -91,9 +91,9 @@ public class PartyService {
 
     @Transactional
     @CacheEvict(value = "myParty", allEntries = true)
-    public ResponseDto deletePartyResult(CustomUserDetails customUserDetails, Long partyId) {
+    public ResponseDto deletePartyResult(User user, Long partyId) {
         //토큰으로 유저 찾기
-        User user = tokenUser(customUserDetails);
+//        User user = tokenUser(customUserDetails);
         log.info("유저 찾기");
         //파티 찾기
         Party party = findPartyById(partyId);
@@ -112,8 +112,8 @@ public class PartyService {
     }
     @Transactional
     @CacheEvict(value = "myParty", allEntries = true)
-    public ResponseDto makePartyResult(CustomUserDetails customUserDetails, MakeParty makeParty) {
-        User user = tokenUser(customUserDetails);
+    public ResponseDto makePartyResult(User user, MakeParty makeParty) {
+//        User user = tokenUser(customUserDetails);
         log.info("유저 : " +user);
         Integer discountId = makeParty.getOptionId();
         String productName = makeParty.getProductName();
@@ -148,11 +148,11 @@ public class PartyService {
     }
     @Transactional
     @Caching(evict = {
-            @CacheEvict(value = "notificationList", key = "#customUserDetails.userId"),
+            @CacheEvict(value = "notificationList", key = "#user.userId"),
             @CacheEvict(value = "myParty", allEntries = true)
     })
-    public ResponseDto updatePartyResult(CustomUserDetails customUserDetails, MakeParty makeParty,Long partyId) {
-        User user = tokenUser(customUserDetails);
+    public ResponseDto updatePartyResult(User user, MakeParty makeParty,Long partyId) {
+//        User user = tokenUser(customUserDetails);
         Party party = findPartyById(partyId);
 
         //본인 호스트가 아닌 경우 예외처리
@@ -197,13 +197,13 @@ public class PartyService {
     }
     @Transactional
     @Caching(evict = {
-            @CacheEvict(value = "notificationList", key = "#customUserDetails.userId"),
+            @CacheEvict(value = "notificationList", key = "#user.userId"),
             @CacheEvict(value = "myParty", allEntries = true),
             @CacheEvict(value="orderList", allEntries = true),
-            @CacheEvict(value = "totalOrderCount", key = "#customUserDetails.userId")
+            @CacheEvict(value = "totalOrderCount", key = "#user.userId")
     })
-    public ResponseDto joinPartyResult(CustomUserDetails customUserDetails, Long partyId) {
-        User user =tokenUser(customUserDetails);
+    public ResponseDto joinPartyResult(User user, Long partyId) {
+//        User user =tokenUser(customUserDetails);
         Party party = partyRepository.findByIdWithLock(partyId)
                 .orElseThrow(()-> new NotFoundException(partyId + "에 해당하는 파티를 찾을 수 없습니다."));
         List<PartyUser> partyUsers = partyUserRepository.findAllByParty(party);
@@ -255,8 +255,8 @@ public class PartyService {
     }
     @Transactional
     @CacheEvict(value = "myParty",allEntries = true)
-    public ResponseDto deleteJoinPartyResult(CustomUserDetails customUserDetails, Long partyId) {
-        User user = tokenUser(customUserDetails);
+    public ResponseDto deleteJoinPartyResult(User user, Long partyId) {
+//        User user = tokenUser(customUserDetails);
         Party party = findPartyById(partyId);
         List<PartyUser> partyUsers = partyUserRepository.findAllByParty(party);
         List<User> partyUserList = partyUsers.stream().map(PartyUser::getUser).toList();
@@ -475,9 +475,9 @@ public class PartyService {
         return new ResponseDto(HttpStatus.OK.value(),"파티 총 개수 조회 성공" ,totalCount);
     }
 
-    public ResponseDto myPartyTotalCountResult(CustomUserDetails customUserDetails) {
+    public ResponseDto myPartyTotalCountResult(User user) {
 
-        Integer myPartyTotalCount = partyRepository.findMyPartyTotalCount(customUserDetails.getUserId());
+        Integer myPartyTotalCount = partyRepository.findMyPartyTotalCount(user.getUserId());
         TotalCount totalCount = TotalCount.of(myPartyTotalCount);
         return new ResponseDto(HttpStatus.OK.value(),"파티 총 개수 조회 성공" ,totalCount);
     }
