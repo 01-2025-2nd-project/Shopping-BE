@@ -54,6 +54,8 @@
 - ` 회원가입 ` : 닉네임/이메일 중복확인 후 남은 유저 정보를 입력하여 회원가입을 진행
 - ` 닉네임 중복확인 ` : 닉네임을 입력 받아 DB에서 존재하는 닉네임이 있는지 확인
 - ` 이메일 중복 확인 ` : 이메일을 입력 받아 DB에서 존재하는 이메일이 있는지 확인
+![Auth-ezgif com-speed](https://github.com/user-attachments/assets/bda44538-811f-4ee2-8649-af4554735491)
+
 
 #### 2. Product
 - ` 상품 등록 ` :  토큰을 받아 관리자인지 확인 후 상품 내용을 받아 등록
@@ -64,6 +66,7 @@
 - ` 상품에 존재하는 파티 리스트 조회 ` : productId를 받아 해당 상품에 존재하는 파티 리스트 조회
 - ` 상품 상세 조회 ` : productId를 받아 해당 상품에 정보를 조회
 - ` 상품 리스트 조회 ` : 한 번에 많은 상품의 조회는 DB의 리소스가 커 pagenation 처리로 상품 리스트 조회 / 정렬 가능
+
    
 #### 3. Party
 - ` 파티 등록 ` :  토큰을 받아 유저 확인, 상품에 존재하는 할인 옵션인지 확인, 유저에 money가 구매하려는 가격보다 많은지 확인 후 파티 등록 진행
@@ -78,15 +81,20 @@
 - ` 프로필 조회 ` :  토큰을 받아 유저 확인, 유저 정보 불러오기
 - ` 프로필 수정 `  : 토큰을 받아 유저 확인, 닉네임, 전화번호, 주소 변경 가능 
 - ` 회원 탈퇴 `  : 토큰을 받아 유저 확인, 토큰에 해당하는 유저 DB에서 삭제 
+![myPage-ezgif com-speed](https://github.com/user-attachments/assets/be9b5543-c588-477d-be4f-e88759d037cd)
 
 #### 5. Order
 - ` 상품 구매 ` :  토큰을 받아 유저 확인, productId를 받아 존재하는 상품인지 확인 ,유저 money가 구매하려는 상품의 가격보다 많은지 확인, 상품 수량 비관적 락 (Pessimistic Lock)을 통해 조회(동시성 해결), 상품 구매 성사되면 유저 money @Query문을 통해 db에서 처리하도록 업데이트(동시성 해결)  
 - ` 구매한 상품 목록 조회 ` : 토큰을 받아 유저 확인,  한 번에 많은 구매 리스트 조회는 DB의 리소스가 커지므로 pagenation 처리로 구매 리스트 조회
- 
+![order](https://github.com/user-attachments/assets/0f4e374b-1cd1-474e-953e-53b20e016147)
+
+
 #### 6. Notification
 - ` 알림 읽음 처리 ` : notificationId를 받아 알림 읽음 처리
 - ` 알림 리스트 조회 ` : 토큰을 받아 유저 확인, 유저에 해당하는 알림 리스트 조회
 - ` 실시간 알림 전송 ` : webSocket을 통해 마지막 파티 참여자가 들어와 파티 성사 시 email로 구독된 파티원들에게 실시간으로 알림 전송
+![notification-ezgif com-speed](https://github.com/user-attachments/assets/54e9489a-e543-4ab8-815e-983157bbe00f)
+
 
 
 ### 6. 트러블 슈팅
