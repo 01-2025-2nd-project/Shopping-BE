@@ -86,7 +86,6 @@ public class PartyService {
         return new ResponseDto(HttpStatus.OK.value(),"조회 성공",myParties);
 
     }
-//    @Scheduled(cron = "0 0 0 * * *")
 
 
     @Transactional
@@ -427,7 +426,7 @@ public class PartyService {
      * */
 
 
-    @Transactional
+
     public void isCheckProductStock(Party party, Discount discount) {
         Product product = productRepository.findByIdWithLock(party.getProduct().getProductId())
                 .orElseThrow(() -> new NotFoundException("파티에 해당하는 상품을 찾을 수 없습니다."));
