@@ -3,8 +3,8 @@ server:
 
 spring:
   datasource:
-    username: farmer
-    password: farmplus1023
+    username: ${USERNAME}
+    password: ${PASSWORD}
     driver-class-name: org.mariadb.jdbc.Driver
     url: jdbc:mariadb://database-1.cvo0mcig6l5w.ap-northeast-2.rds.amazonaws.com:3306/farm_plus?useUnicode=true&characterEncoding=UTF-8
   jpa:
@@ -18,7 +18,7 @@ logging:
     org.hibernate.type.descriptor.sql: TRACE
 
 jwt:
-  secret-key-source: farmplusyujinhonghyeonbackendteam  # JWT 비밀키
+  secret-key-source: ${SECRET_KEY}  # JWT 비밀키
 
 security:
   oauth2:
