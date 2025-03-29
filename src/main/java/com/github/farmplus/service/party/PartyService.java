@@ -29,6 +29,7 @@ import com.github.farmplus.web.dto.count.TotalCount;
 import com.github.farmplus.web.dto.notification.NotificationDto;
 import com.github.farmplus.web.dto.party.request.MakeParty;
 import com.github.farmplus.web.dto.party.response.MyParty;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -42,9 +43,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -61,6 +64,7 @@ public class PartyService {
     private final OrderRepository orderRepository;
     private final NotificationRepository notificationRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private EntityManager entityManager;
     @Transactional
     public void updateStatus(){
         LocalDate now = LocalDate.now();
@@ -194,6 +198,46 @@ public class PartyService {
         return new ResponseDto(HttpStatus.OK.value(),"파티 정보가 변경되었습니다.");
 
     }
+//    @Transactional(isolation = Isolation.SERIALIZABLE) // 트랜잭션 직렬화
+//    public ResponseDto joinPartyResult(User user, long partyId) {
+//        System.out.println("Thread " + Thread.currentThread().getName() + " - joinPartyResult started for partyId: " + partyId);
+//
+//        // 파티 조회
+//        Party party = partyRepository.findById(partyId)
+//                .orElseThrow(() -> new NotFoundException(partyId + "에 해당하는 파티를 찾을 수 없습니다."));
+//
+//        ProductDiscount productDiscount = party.getProductDiscount();
+//        if (productDiscount == null) {
+//            throw new IllegalStateException("ProductDiscount is null for partyId: " + partyId);
+//        }
+//
+//        Discount discount = productDiscount.getDiscount();
+//        if (discount == null) {
+//            throw new IllegalStateException("Discount is null for partyId: " + partyId);
+//        }
+//
+//        // 비관적 락으로 제품 조회
+//        Product product = productRepository.findByIdWithLock(party.getProduct().getProductId())
+//                .orElseThrow(() -> new NotFoundException("파티에 해당하는 상품을 찾을 수 없습니다."));
+//
+//        long requiredStock = (long) party.getCapacity() * discount.getPeople();
+//        System.out.println("Thread " + Thread.currentThread().getName() + " - Required stock: " + requiredStock + ", Current stock: " + product.getStock());
+//
+//        if (requiredStock > product.getStock()) {
+//            System.out.println("Thread " + Thread.currentThread().getName() + " - Stock shortage detected");
+//            party.updatePartyStatus(PartyStatus.FAILED);
+//            throw new StockShortageException("현재 상품 " + product.getProductName() + "은(는) 재고 부족으로 구매가 불가합니다.");
+//        }
+//
+//        product.updateStock(product.getStock() - requiredStock);
+//        productRepository.saveAndFlush(product); // 즉시 DB 반영
+//        System.out.println("Thread " + Thread.currentThread().getName() + " - Stock updated to: " + product.getStock());
+//
+//        party.updatePartyStatus(PartyStatus.COMPLETED);
+//        System.out.println("Thread " + Thread.currentThread().getName() + " - Party " + party.getPartyName() + " completed");
+//
+//        return new ResponseDto(HttpStatus.CREATED.value(), "파티 참여 및 재고 감소 성공");
+//    }
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = "notificationList", key = "#user.userId"),
@@ -425,8 +469,26 @@ public class PartyService {
      * 현재 상품 수량과 비교하기
      * */
 
-
-
+////    @Transactional(isolation = Isolation.SERIALIZABLE, timeout = 10) // 트랜잭션 타임아웃 10초
+//    public void isCheckProductStock(Party party, Discount discount) {
+//        System.out.println("Thread " + Thread.currentThread().getName() + " - Entering isCheckProductStock for party: " + party.getPartyName());
+//        Product product = productRepository.findByIdWithLock(party.getProduct().getProductId())
+//                .orElseThrow(() -> new NotFoundException("파티에 해당하는 상품을 찾을 수 없습니다."));
+//
+//        long requiredStock = (long) party.getCapacity() * discount.getPeople();
+//        System.out.println("Thread " + Thread.currentThread().getName() + " - Required stock: " + requiredStock + ", Current stock: " + product.getStock());
+//
+//        if (requiredStock > product.getStock()) {
+//            System.out.println("Thread " + Thread.currentThread().getName() + " - Stock shortage detected");
+//            party.updatePartyStatus(PartyStatus.FAILED);
+//            throw new StockShortageException("현재 상품 " + product.getProductName() + "은(는) 재고 부족으로 구매가 불가합니다.");
+//        }
+//
+//        product.updateStock(product.getStock() - requiredStock);
+//        productRepository.saveAndFlush(product); // 즉시 반영
+//        System.out.println("Thread " + Thread.currentThread().getName() + " - Stock updated to: " + product.getStock());
+//    }
+    @Transactional
     public void isCheckProductStock(Party party, Discount discount) {
         Product product = productRepository.findByIdWithLock(party.getProduct().getProductId())
                 .orElseThrow(() -> new NotFoundException("파티에 해당하는 상품을 찾을 수 없습니다."));
@@ -439,6 +501,7 @@ public class PartyService {
 
         // 재고 업데이트
         product.updateStock(product.getStock() - requiredStock);
+        productRepository.saveAndFlush(product); // 즉시 반영
     }
     /**
      * 이미 참여한 파티인지 확인

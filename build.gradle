@@ -64,7 +64,7 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
-	enabled=false
+//	enabled=false
 }
 
 tasks.named('bootJar', BootJar) {
