@@ -1,18 +1,21 @@
 package com.github.farmplus.web.dto.product.response;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.github.farmplus.repository.product.ProductWithOrderAndParty;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
+
+import java.io.Serializable;
 
 @Getter
 @ToString
 @Builder
-public class ProductMain {
-    private final Long productId;
-    private final String productName;
-    private final Long price;
-    private final Long partyCount;
+@AllArgsConstructor
+@NoArgsConstructor
+public class ProductMain implements Serializable {
+    private Long productId;
+    private String productName;
+    private Long price;
+    private Long partyCount;
 
     public static ProductMain of(ProductWithOrderAndParty productWithOrderCount){
         return ProductMain.builder()

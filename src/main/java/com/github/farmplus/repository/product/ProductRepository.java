@@ -95,14 +95,14 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
             "ORDER BY p.price ASC")
     Page<ProductWithOrderAndParty> findAllByCategoryOrderByPriceAsc(Category category,Pageable pageable);
 
-//    @Lock(LockModeType.PESSIMISTIC_WRITE)
-//    @Query("SELECT p FROM Product p WHERE p.productId = :id")
-//    Optional<Product> findByIdWithLock(@Param("id") long id);
-
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "5000")}) // 5초 타임아웃
     @Query("SELECT p FROM Product p WHERE p.productId = :id")
     Optional<Product> findByIdWithLock(@Param("id") long id);
+
+//    @Lock(LockModeType.PESSIMISTIC_WRITE)
+//    @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "5000")}) // 5초 타임아웃
+//    @Query("SELECT p FROM Product p WHERE p.productId = :id")
+//    Optional<Product> findByIdWithLock(@Param("id") long id);
 
 
     @Query("SELECT COUNT(p) FROM Product p")
