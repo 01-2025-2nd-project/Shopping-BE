@@ -1,10 +1,13 @@
 # FarmPlus Web Project
+<br>
+
 ## 팀원 소개
 
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;한유진🐰 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 임홍현😺 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | 
 | :--------------- | :--------------- | 
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@yj267](https://github.com/yj267) | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@limhhyeon](https://github.com/limhhyeon) 
 
+<br>
 
 
 ## 1. 프로젝트 소개
@@ -15,7 +18,8 @@
 - 구매순, 가격순, 등록순에 따른 정렬이 가능하며, 카테고리별로 구분되어 원하는 상품을 빠르게 찾을 수 있습니다.
 - 구매 및 구매 목록 조회는 물론, 공동구매 팟 생성 & 참여 & 관리가 가능합니다.
 - 실시간 알림 및 읽음 여부에 따른 알림 처리 기능을 제공합니다.
- 
+
+ <br>
 
 ## 2. 기술 스택
 ` Java 17+ ` : 최신 기능과 성능 개선을 위해 사용  
@@ -34,9 +38,12 @@
 ` Git / GitHub ` : 코드 형상 관리  
 
 
+<br>
+
 ## 3. ERD
 ![image](https://github.com/user-attachments/assets/143542b9-9780-4157-8857-eb9ec9b592d8)
  
+<br>
 
 ## 4. 기능 전략
 ### 1. Auth
@@ -86,7 +93,7 @@
 - ` 실시간 알림 전송 ` : webSocket을 통해 마지막 파티 참여자가 들어와 파티 성사 시 email로 구독된 파티원들에게 실시간으로 알림 전송
 ![notification-ezgif com-speed](https://github.com/user-attachments/assets/54e9489a-e543-4ab8-815e-983157bbe00f)
 
-
+<br>
 
 ## 5. 트러블 슈팅
 
@@ -102,6 +109,8 @@
 | `N+1`        | @ManyToOne과 @OneToMany 사용 시 조회를 하는 과정에서 한 번의 쿼리문이 아닌 반복적인 쿼리 문 발생                  | 1. 필요한 필드명만 따로 뺀 클래스를 만들어 해결  | 
 |        | Fetch Join을 사용하여 해결                  | 파티유저를 먼저 삭제 후 파티를 삭제하여 해결 | 
 | `cors(Mixed Content)`        | 백엔드가 배포한 프로젝트에서 프론트 배포 주소 허용 안해서 발생                  | 프론트 요청 주소 허용해주는 config 빈으로 등록 후 SecutiryConfig에 추가하여 해결 | 
+
+<br>
 
 ## 5-1 주요 트러블 슈팅
 ### 1) 동시성  
@@ -129,6 +138,8 @@
 
 #### *스케줄러를 통해 Redis에 저장 후 조회(8ms)*    
 ![팜플러스 redis 저장한 후2](https://github.com/user-attachments/assets/baf2bfe1-6756-4790-b600-eeb5f8ddceb4)  
+
+<br>
 
 ## 6. Lessons Learned
 
@@ -212,6 +223,7 @@ int deductBalance(@Param("userId") Long userId, @Param("amount") int amount);
 ### *AWS EC2 배포*
 이전 프로젝트에서는 AWS EC2를 사용해 서버를 배포하는 과정에서 여러 가지 문제에 부딪혔습니다. 특히, 서버 설정과 배포 후 운영에 어려움이 있었지만, 팀원이 EC2 배포 과정을 깔끔하게 처리한 코드를 보면서 많은 것을 배웠습니다.  다음 프로젝트에서는 AWS EC2를 사용해 직접 배포하고 운영하는 경험을 쌓아볼 계획입니다 추가로 매번 코드가 수정되면 재배포를 진행했어야 했는데 다음 프로젝트에서는 지속적인 통합(CI) 지속적인 배포(CD)도 적용해 볼 것입니다.
 
+<br>
 
 ## 7. Feedback
 ✔️ setter 사용 X -> 객체 안에 Custom 메소드로 만들어서 사용  
@@ -219,8 +231,10 @@ int deductBalance(@Param("userId") Long userId, @Param("amount") int amount);
 ✔️ 토큰 받아서 유저 조회하는 반복적인 로직 대신 JwtArgumenrResolver 사용  
 ✔️ Lock 많이 사용 시 성능 저하 또는 데드락 발생이 있으므로 decrease같이 업데이트 문 직접 사용  
 
+<br>
 
 ## 8. 회고
+<br>
 
 ***협업*** : 프로젝트를 처음 진행하는 과정에서 백엔드와 프론트간 협업 과정이 익숙치 않아 적응하는 시간이 오래 걸렸지만 주기적인 회의를 통해 코드를 리뷰하고 소통함으로써 성공적으로 프로젝트를 마칠 수 있었습니다. 이를 통해 협업에 대한 이해도가 상승하였고 다음 프로젝트에서는 협업을 하면서 겪었던 어려움을 잘 해결할 수 있을 것으로 기대됩니다 🐰
 
