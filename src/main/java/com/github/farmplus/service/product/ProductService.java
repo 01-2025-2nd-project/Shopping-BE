@@ -63,10 +63,8 @@ public class ProductService {
     private Page<ProductMain> getProductsFromCacheOrDb(String sort, Pageable pageable, String categoryName) {
         String redisKey = redisUtil.generateRedisKey(categoryName, sort);
         List<ProductMain> cachedList = redisUtil.getCachedProductList(redisKey);
-        log.info("Redis key: {}, Cache hit: {}, Size: {}", redisKey, cachedList != null, cachedList != null ? cachedList.size() : 0);
 
         if (cachedList != null) {
-            log.info("Returning data from cache for category: {}", categoryName);
             int start = (int) pageable.getOffset();
             int end = Math.min(start + pageable.getPageSize(), cachedList.size());
             if (start >= cachedList.size()) {
@@ -75,7 +73,7 @@ public class ProductService {
             return new PageImpl<>(cachedList.subList(start, end), pageable, cachedList.size());
         }
 
-        log.info("Cache miss, querying DB and caching for category: {}", categoryName);
+
         Page<ProductWithOrderAndParty> products;
         if (categoryName.equalsIgnoreCase("all")) {
             products = getProductsBySort(sort, pageable);
@@ -96,64 +94,6 @@ public class ProductService {
         ProductSort productSort = ProductSort.from(sort);
         return productSort.fetchCategoryProducts(productRepository, category, pageable);
     }
-
-//    public ResponseDto productListResult(String categoryName, String sort, Integer pageNum) {
-//
-//        Pageable pageable = PageRequest.of(pageNum,10);
-//        Page<ProductMain> productList;
-//        if (categoryName.equalsIgnoreCase("all")){
-//            productList = getProductsBySort(sort,pageable);
-//        }else {
-//            Category category =categoryRepository.findByCategoryName(categoryName)
-//                    .orElseThrow(()-> new NotFoundException(categoryName + "에 해당하는 카테고리가 존재하지 않습니다."));
-//            productList = getProductsBySortAndCategory(sort, category, pageable);
-//        }
-//        return new ResponseDto(HttpStatus.OK.value(),"조회 성공", productList);
-//
-//    }
-//    public Page<ProductMain> getProductsBySort(String sort,Pageable pageable){
-//        Page<ProductWithOrderAndParty> products;
-//        if (sort.equalsIgnoreCase("createAt")){
-//            products = productRepository.findAllByOrderByCreateAtDesc(pageable);
-//            return products.map(ProductMain::of);
-//        }else if(sort.equalsIgnoreCase("purchaseCount")){
-//            products = productRepository.findAllOrderByOrderCountDesc(pageable);
-//            return products.map(ProductMain::of);
-//        }
-//        else if(sort.equalsIgnoreCase("priceDescending")){
-//            products= productRepository.findAllByOrderByPriceDesc(pageable);
-//            return products.map(ProductMain::of);
-//        }
-//        else if(sort.equalsIgnoreCase("priceAscending")){
-//            products = productRepository.findAllByOrderByPriceAsc(pageable);
-//            return products.map(ProductMain::of);
-//        }
-//        products = productRepository.findAllByOrderByCreateAtDesc(pageable);
-//        return products.map(ProductMain::of);
-//
-//    }
-//    public Page<ProductMain> getProductsBySortAndCategory(String sort, Category category, Pageable pageable) {
-//        // 카테고리별로 상품을 정렬
-//        Page<ProductWithOrderAndParty> products;
-//        if (sort.equalsIgnoreCase("createAt")) {
-//            products = productRepository.findAllByCategoryOrderByCreateAtDesc(category, pageable);
-//            return products.map(ProductMain::of);
-//        } else if (sort.equalsIgnoreCase("purchaseCount")) {
-//            products = productRepository.findAllByCategoryOrderByOrderCountDesc(category, pageable);
-//            return products.map(ProductMain::of);
-//
-//        } else if (sort.equalsIgnoreCase("priceDescending")) {
-//            products =productRepository.findAllByCategoryOrderByPriceDesc(category, pageable);
-//            return products.map(ProductMain::of);
-//        } else if (sort.equalsIgnoreCase("priceAscending")) {
-//            products =productRepository.findAllByCategoryOrderByPriceAsc(category, pageable);
-//            return products.map(ProductMain::of);
-//        }
-//
-//        // 기본적으로 생성일 기준 정렬
-//        products= productRepository.findAllByCategoryOrderByCreateAtDesc(category, pageable);
-//        return products.map(ProductMain::of);
-//    }
 
     @Cacheable(value = "productDetail" , key = "#productId")
     public ResponseDto productDetailResult(Long productId) {

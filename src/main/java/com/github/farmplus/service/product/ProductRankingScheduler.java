@@ -33,7 +33,7 @@ public class ProductRankingScheduler {
     @Scheduled(fixedRate = 3600000)
     @Transactional(readOnly = true)
     public void cacheProductRankings() {
-        try {
+
             // 전체 상품 캐싱
             cacheAllProducts("purchaseCount", productRepository.findAllOrderByOrderCountDesc(PageRequest.of(0, 1000)));
             cacheAllProducts("priceAscending", productRepository.findAllByOrderByPriceAsc(PageRequest.of(0, 1000)));
@@ -48,23 +48,21 @@ public class ProductRankingScheduler {
                 cacheCategoryProducts(category, "priceDescending", productRepository.findAllByCategoryOrderByPriceDesc(category, PageRequest.of(0, 1000)));
                 cacheCategoryProducts(category, "createAt", productRepository.findAllByCategoryOrderByCreateAtDesc(category, PageRequest.of(0, 1000)));
             }
-        } catch (Exception e) {
-            log.error("Failed to cache products", e);
-        }
+
     }
 
     private void cacheAllProducts(String sort, Page<ProductWithOrderAndParty> products) {
         List<ProductMain> productList = products.map(ProductMain::of).getContent();
         String redisKey = redisUtil.generateRedisKey("all", sort);
         redisUtil.cacheProductList(redisKey, productList, 2, TimeUnit.HOURS);
-        log.info("Cached {} products for all, sort: {}", productList.size(), sort);
+
     }
 
     private void cacheCategoryProducts(Category category, String sort, Page<ProductWithOrderAndParty> products) {
         List<ProductMain> productList = products.map(ProductMain::of).getContent();
         String redisKey = redisUtil.generateRedisKey(category.getCategoryName(), sort);
         redisUtil.cacheProductList(redisKey, productList, 2, TimeUnit.HOURS);
-        log.info("Cached {} products for category: {}, sort: {}", productList.size(), category.getCategoryName(), sort);
+
     }
 
 
