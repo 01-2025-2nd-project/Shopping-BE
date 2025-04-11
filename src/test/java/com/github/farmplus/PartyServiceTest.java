@@ -170,7 +170,7 @@ public class PartyServiceTest {
         executorService.shutdown();
 
         // Then: 검증
-        Product updatedProduct = productRepository.findById(product.getProductId()).get();
+        Product updatedProduct = productRepository.findByIdWithLock(product.getProductId()).get();
         System.out.println("Final stock: " + updatedProduct.getStock());
         System.out.println("Success count: " + successCount.get() + ", Fail count: " + failCount.get());
         assertEquals(0, updatedProduct.getStock());
