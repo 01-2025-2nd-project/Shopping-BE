@@ -8,6 +8,7 @@ import com.github.farmplus.repository.party.PartyRepository;
 import com.github.farmplus.repository.partyUser.PartyUserRepository;
 import com.github.farmplus.repository.product.Product;
 import com.github.farmplus.repository.product.ProductRepository;
+import com.github.farmplus.repository.product.ProductSort;
 import com.github.farmplus.repository.product.ProductWithOrderAndParty;
 import com.github.farmplus.repository.product_discount.ProductDiscount;
 import com.github.farmplus.repository.product_discount.ProductDiscountRepository;
@@ -27,14 +28,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

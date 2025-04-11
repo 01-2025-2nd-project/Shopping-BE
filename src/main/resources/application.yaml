@@ -39,8 +39,5 @@ security:
   data:
     redis:
       #host: localhost
-      host: ENC(n60mvykJRU2R5SBqLmUiyatj973/jexg) #ENC(4i+ka2OLOJPRQUSzIXfseA6RSvcUhwx7) # 추후 ec2 프라이빗 아이피로 변경 필요2.
+      host: ENC(n60mvykJRU2R5SBqLmUiyatj973/jexg)
       port: 6379
-gradle:
-  java:
-    home: "/usr/lib/jvm/java-17-openjdk-amd64"

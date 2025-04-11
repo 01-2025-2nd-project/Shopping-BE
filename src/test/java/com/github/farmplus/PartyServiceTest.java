@@ -31,7 +31,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@TestPropertySource(locations = "classpath:application.yaml")
 public class PartyServiceTest {
 
     @Autowired
@@ -60,7 +59,7 @@ public class PartyServiceTest {
     @BeforeEach
     void setUp() {
         category = categoryRepository.findById(1)
-                .orElseThrow(() -> new RuntimeException("Category with ID 1 not found"));
+                .orElseThrow(() -> new RuntimeException("카테고리 찾을 수 없음"));
 
         product = Product.builder()
                 .productName("Test Product")
@@ -84,13 +83,12 @@ public class PartyServiceTest {
     }
 
     @Test
-    @Rollback(false) // 롤백 비활성화
     void testConcurrentPartyJoin() throws InterruptedException {
         // Given: 3개의 파티 생성
         Party party1 = Party.builder()
                 .product(product)
                 .productDiscount(productDiscount)
-                .partyName("Party 1")
+                .partyName("파티1")
                 .endDate(LocalDate.now().plusDays(1))
                 .status(PartyStatus.RECRUITING)
                 .capacity(1)
@@ -98,7 +96,7 @@ public class PartyServiceTest {
         Party party2 = Party.builder()
                 .product(product)
                 .productDiscount(productDiscount)
-                .partyName("Party 2")
+                .partyName("파티2")
                 .endDate(LocalDate.now().plusDays(1))
                 .status(PartyStatus.RECRUITING)
                 .capacity(1)
@@ -106,7 +104,7 @@ public class PartyServiceTest {
         Party party3 = Party.builder()
                 .product(product)
                 .productDiscount(productDiscount)
-                .partyName("Party 3")
+                .partyName("파티3")
                 .endDate(LocalDate.now().plusDays(1))
                 .status(PartyStatus.RECRUITING)
                 .capacity(1)
@@ -129,11 +127,11 @@ public class PartyServiceTest {
 
         Runnable task1 = () -> {
             try {
-                System.out.println("Task 1: Joining party " + savedParty1.getPartyId());
+                System.out.println("Task1: 참여 파티 " + savedParty1.getPartyId());
                 partyService.joinPartyResult(user1, savedParty1.getPartyId());
                 successCount.incrementAndGet();
             } catch (Exception e) {
-                System.err.println("Task 1 failed: " + e.getMessage());
+                System.err.println("Task1 실패: " + e.getMessage());
                 failCount.incrementAndGet();
             } finally {
                 latch.countDown();
@@ -141,11 +139,11 @@ public class PartyServiceTest {
         };
         Runnable task2 = () -> {
             try {
-                System.out.println("Task 2: Joining party " + savedParty2.getPartyId());
+                System.out.println("Task2: 참여 파티 " + savedParty2.getPartyId());
                 partyService.joinPartyResult(user2, savedParty2.getPartyId());
                 successCount.incrementAndGet();
             } catch (Exception e) {
-                System.err.println("Task 2 failed: " + e.getMessage());
+                System.err.println("Task2 실패: " + e.getMessage());
                 failCount.incrementAndGet();
             } finally {
                 latch.countDown();
@@ -153,11 +151,11 @@ public class PartyServiceTest {
         };
         Runnable task3 = () -> {
             try {
-                System.out.println("Task 3: Joining party " + savedParty3.getPartyId());
+                System.out.println("Task3: 참여 파티 " + savedParty3.getPartyId());
                 partyService.joinPartyResult(user3, savedParty3.getPartyId());
                 successCount.incrementAndGet();
             } catch (Exception e) {
-                System.err.println("Task 3 failed: " + e.getMessage());
+                System.err.println("Task3 실패: " + e.getMessage());
                 failCount.incrementAndGet();
             } finally {
                 latch.countDown();

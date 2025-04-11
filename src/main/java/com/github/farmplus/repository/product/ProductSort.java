@@ -1,8 +1,6 @@
-package com.github.farmplus.service.product;
+package com.github.farmplus.repository.product;
 
 import com.github.farmplus.repository.category.Category;
-import com.github.farmplus.repository.product.ProductRepository;
-import com.github.farmplus.repository.product.ProductWithOrderAndParty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
