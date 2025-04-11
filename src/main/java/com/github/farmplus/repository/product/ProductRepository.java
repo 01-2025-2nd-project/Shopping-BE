@@ -3,11 +3,13 @@ package com.github.farmplus.repository.product;
 import com.github.farmplus.repository.category.Category;
 import com.github.farmplus.repository.product_discount.ProductDiscount;
 import jakarta.persistence.LockModeType;
+import jakarta.persistence.QueryHint;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -95,7 +97,13 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT p FROM Product p WHERE p.productId = :id")
-    Optional<Product> findByIdWithLock(@Param("id") Long id);
+    Optional<Product> findByIdWithLock(@Param("id") long id);
+
+//    @Lock(LockModeType.PESSIMISTIC_WRITE)
+//    @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "5000")}) // 5초 타임아웃
+//    @Query("SELECT p FROM Product p WHERE p.productId = :id")
+//    Optional<Product> findByIdWithLock(@Param("id") long id);
+
 
     @Query("SELECT COUNT(p) FROM Product p")
     Integer findProductTotalCount();

@@ -29,6 +29,7 @@ import com.github.farmplus.web.dto.count.TotalCount;
 import com.github.farmplus.web.dto.notification.NotificationDto;
 import com.github.farmplus.web.dto.party.request.MakeParty;
 import com.github.farmplus.web.dto.party.response.MyParty;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -42,9 +43,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -86,7 +89,6 @@ public class PartyService {
         return new ResponseDto(HttpStatus.OK.value(),"조회 성공",myParties);
 
     }
-//    @Scheduled(cron = "0 0 0 * * *")
 
 
     @Transactional
@@ -195,6 +197,7 @@ public class PartyService {
         return new ResponseDto(HttpStatus.OK.value(),"파티 정보가 변경되었습니다.");
 
     }
+
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = "notificationList", key = "#user.userId"),
@@ -340,17 +343,7 @@ public class PartyService {
         }
     }
 
-    /*
-    * 토큰에 해당하는 유저 찾기 메소드
-    * */
-    public User tokenUser(CustomUserDetails customUserDetails){
-        log.info("tokenUser 메서드 시작");
-        String email = customUserDetails.getUsername();
-        User user = userRepository.findByEmailFetchJoin(email)
-                .orElseThrow(()-> new NotFoundException(email + "에 해당하는 유저가 존재하지 않습니다."));
-        log.info("tokenUser 메서드 끝");
-        return  user;
-    }
+
     /**
      * 상품/할인/상품에 해당하는 할인/파티 찾기 찾기/파티 유저 찾기
      * */
@@ -425,7 +418,6 @@ public class PartyService {
     /**
      * 현재 상품 수량과 비교하기
      * */
-
 
     @Transactional
     public void isCheckProductStock(Party party, Discount discount) {

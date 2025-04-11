@@ -12,12 +12,13 @@ spring:
     database-platform: org.hibernate.dialect.MySQL8Dialect
     hibernate:
       ddl-auto: none
-  logging:
-    level:
-      io.netty.resolver.dns: DEBUG
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql: TRACE
 
 jwt:
-  secret-key-source: ${SECRETKEY}  # JWT 비밀키
+  secret-key-source: ${SECRET_KEY}  # JWT 비밀키
 
 security:
   oauth2:
@@ -35,7 +36,8 @@ security:
           token-uri: https://kauth.kakao.com/oauth/token
           user-info-uri: https://kapi.kakao.com/v2/user/me
 
-
-gradle:
-  java:
-    home: "/usr/lib/jvm/java-17-openjdk-amd64"
+  data:
+    redis:
+      #host: localhost
+      host: ENC(n60mvykJRU2R5SBqLmUiyatj973/jexg)
+      port: 6379
