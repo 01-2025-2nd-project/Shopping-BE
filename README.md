@@ -108,12 +108,29 @@
 |        | Fetch Join을 사용하여 해결                  | 파티유저를 먼저 삭제 후 파티를 삭제하여 해결 | 
 | `cors(Mixed Content)`        | 백엔드가 배포한 프로젝트에서 프론트 배포 주소 허용 안해서 발생                  | 프론트 요청 주소 허용해주는 config 빈으로 등록 후 SecutiryConfig에 추가하여 해결 | 
 
-### 5-1 주요 트러블 슈팅 이미지
-|  문제                                                                 |
-|---------------------------------|----------------------------------------------------------------------|
-| `동시성 문제`        | 파티 등록할 때 여러 사람이 동시에 파티에 참여할 때 참여 가능한 인원수보다 오바되는 경우 발생              |
+### 5-1 주요 트러블 슈팅
+1) 동시성  
+- 3개의 파티를 생성 후 각 파티들은 3개씩 구매 상품은 3개만 남은 상태  
+*Lock 적용 전*  
+```
+        Product product = productRepository.findById(party.getProduct().getProductId())
+                .orElseThrow(() -> new NotFoundException("파티에 해당하는 상품을 찾을 수 없습니다."));
+```  
+![팜플러스 동시성 실패](https://github.com/user-attachments/assets/6b3add87-b140-48a4-b316-4f7ad196e378)  
 
+*Lock 적용 후*  
+```
+        Product product = productRepository.findByIdWithLock(party.getProduct().getProductId())
+                .orElseThrow(() -> new NotFoundException("파티에 해당하는 상품을 찾을 수 없습니다."));
+```  
+![팜플러스 동시성 성공](https://github.com/user-attachments/assets/8e2b5d3b-2444-4170-9989-594e645c609c)  
 
+2) 상품 리스트 조회    
+- 카테고리와 상품 구매 순으로 조회  
+*@Query문으로 바로 조회(41ms)*  
+![팜플러스 redis 저장하기 전](https://github.com/user-attachments/assets/831991d0-5e6f-4fd1-a58f-c3177b8f1af5)    
+스케줄러를 통해 Redis에 저장 후 조회(8ms)  
+![팜플러스 redis 저장한 후2](https://github.com/user-attachments/assets/baf2bfe1-6756-4790-b600-eeb5f8ddceb4)  
 
 ### 6. Lessons Learned
 ----------
